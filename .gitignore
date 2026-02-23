@@ -1,6 +1,9 @@
 #agents
 .agents/
 
+#todo
+.todo/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

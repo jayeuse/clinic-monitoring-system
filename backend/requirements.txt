@@ -4,3 +4,4 @@ sqlmodel
 redis
 python-dotenv
 pydantic-settings
+alembic
