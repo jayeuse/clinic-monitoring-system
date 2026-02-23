@@ -1,4 +1,3 @@
-from sqlalchemy import UUID
 from models.patients import SexType
 from datetime import date
 from typing import Optional
