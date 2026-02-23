@@ -1,3 +1,4 @@
+from sqlmodel import Session
 from sqlmodel import SQLModel, create_engine
 from core.config import settings
 import models
@@ -7,6 +8,10 @@ engine = create_engine(
     connect_args={"check_same_thread": False}, 
     echo=True
 )
+
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 def create_database():
     SQLModel.metadata.create_all(engine)

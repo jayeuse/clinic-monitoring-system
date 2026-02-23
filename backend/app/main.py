@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from core.database import create_database
 
+from routers import patients
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_database()
@@ -25,6 +27,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(patients.router)
 
 @app.get("/")
 def read_root():
