@@ -1,35 +1,27 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, {useEffect} from "react";
+import api from "./services/api"
+
+const checkHealth = async () => {
+  try {
+    const response = await api.get("/health");
+    console.log("Backend Status: ", response.data);
+  } catch (error) {
+    console.error("Coonection Failed: ", error);
+  }
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  
+  useEffect(() => {
+    checkHealth();
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="container mx-auto p-8">
+      <h1 className="text-3x1 font-bold">Clinic Monitoring System</h1>
+      <p className="mt-4 text-gray-600">Starting fresh UI Implementation</p>
+    </div>
+  );
 }
 
-export default App
+export default App;
