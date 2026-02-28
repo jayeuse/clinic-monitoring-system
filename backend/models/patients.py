@@ -8,6 +8,7 @@ from enum import Enum
 
 if TYPE_CHECKING:
     from .clinic import ClinicTransaction
+    from .history import MedicalHistory
 
 class PatientType(str, Enum):
     STUDENT = "STUDENT"
@@ -42,6 +43,8 @@ class PatientInformation(BaseModel, table=True):
     zip_code: Optional[str] = Field(default=None, max_length=10)
 
     transactions: list["ClinicTransaction"] = Relationship(back_populates="patient")
+
+    medical_history: Optional["MedicalHistory"] = Relationship(back_populates="patient")
 
 class StudentType(BaseModel, table=True):
     patient_uuid: UUID = Field(foreign_key="patientinformation.uuid", unique=True)

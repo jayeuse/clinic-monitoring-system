@@ -1,5 +1,6 @@
+from sqlmodel import Relationship
 from datetime import date
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from uuid import UUID
 from sqlmodel import Field, TEXT
 from models.base import BaseModel
@@ -27,8 +28,13 @@ class BodySystemStatus(str, Enum):
     ABNORMAL = "ABNORMAL"
     NOT_ASSESSED = "NOT_ASSESSED"
 
+if TYPE_CHECKING:
+    from .patients import PatientInformation
+
 class MedicalHistory(BaseModel, table=True):
     mh_id: str = Field(unique=True, index=True, max_length=20)
+
+    patient: "PatientInformation" = Relationship(back_populates="medical_history")
 
     patient_uuid: UUID = Field(foreign_key="patientinformation.uuid", index=True)
 
