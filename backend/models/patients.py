@@ -1,9 +1,13 @@
+from sqlmodel import Relationship
 from uuid import UUID
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from datetime import date
 from sqlmodel import Field
 from models.base import BaseModel
 from enum import Enum
+
+if TYPE_CHECKING:
+    from .clinic import ClinicTransaction
 
 class PatientType(str, Enum):
     STUDENT = "STUDENT"
@@ -36,6 +40,8 @@ class PatientInformation(BaseModel, table=True):
     city: Optional[str] = Field(default=None, max_length=100)
     province: Optional[str] = Field(default=None, max_length=100)
     zip_code: Optional[str] = Field(default=None, max_length=10)
+
+    transactions: list["ClinicTransaction"] = Relationship(back_populates="patient")
 
 class StudentType(BaseModel, table=True):
     patient_uuid: UUID = Field(foreign_key="patientinformation.uuid", unique=True)
