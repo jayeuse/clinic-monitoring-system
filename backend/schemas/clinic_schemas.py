@@ -6,8 +6,19 @@ from pydantic import BaseModel, computed_field
 
 class VitalSignsCreate(BaseModel):
     ct_id: str
+
     height: Optional[float] = None
     weight: Optional[float] = None
+
+    temperature: Optional[float] = None
+    pulse: Optional[int] = None
+    blood_pressure: Optional[str] = None
+    respiratory_rate: Optional[int] = None
+
+class VitalSignsUpdate(BaseModel):
+    height: Optional[float] = None
+    weight: Optional[float] = None
+
     temperature: Optional[float] = None
     pulse: Optional[int] = None
     blood_pressure: Optional[str] = None
@@ -18,8 +29,10 @@ class VitalSignsPublic(BaseModel):
 
     transaction: Optional[Any] = Field(default=None, exclude=True)
     date_taken: date
+
     height: Optional[float] = None
     weight: Optional[float] = None
+
     temperature: Optional[float] = None
     pulse: Optional[int] = None
     blood_pressure: Optional[str] = None
@@ -41,8 +54,20 @@ class VitalSignsPublic(BaseModel):
 
 class ClinicTransactionCreate(BaseModel):
     patient_id: str
+
     category: str
     reason: str
+
+    medication_given: Optional[str] = None
+    quantity: Optional[int] = None
+    remarks: Optional[str] = None
+
+class ClinicTransactionUpdate(BaseModel):
+    category: Optional[str] = None
+    reason: Optional[str] = None
+
+    time_out: Optional[time] = None
+
     medication_given: Optional[str] = None
     quantity: Optional[int] = None
     remarks: Optional[str] = None
@@ -52,8 +77,10 @@ class ClinicTransactionPublic(BaseModel):
 
     patient: Optional[Any] = Field(None, exclude=True)
     transaction_date: date
+
     time_in: time
     time_out: Optional[time] = None
+
     category: str
     reason: str
     medication_given: Optional[str] = None
