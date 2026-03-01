@@ -1,6 +1,12 @@
 #agents
 .agents/
 
+#github copilot instructions
+.github/
+
+#CLAUDE.md
+CLAUDE.md
+
 #todo
 .todo/
 
