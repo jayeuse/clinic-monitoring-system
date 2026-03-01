@@ -32,7 +32,7 @@ class ClinicTransactionService(BaseService[ClinicTransaction]):
         return super().create(db, obj_in=db_obj)
 
     def get_by_ct_id(self, db: Session, ct_id: str) -> Optional[ClinicTransaction]:
-        statement = select(self.model).where(self.model.ct_id == ct_id)
+        statement = select(self.model).where(self.model.ct_id == ct_id, self.model.is_deleted.is_(False))
         return db.exec(statement).first()
 
 class VitalSignsService(BaseService[VitalSigns]):
@@ -60,7 +60,7 @@ class VitalSignsService(BaseService[VitalSigns]):
         return super().create(db, obj_in=db_obj)
 
     def get_by_vs_id(self, db: Session, vs_id: str):
-        statement = select(self.model).where(self.model.vs_id == vs_id)
+        statement = select(self.model).where(self.model.vs_id == vs_id, self.model.is_deleted.is_(False))
         return db.exec(statement).first()
 
 clinic_service = ClinicTransactionService()

@@ -1,3 +1,5 @@
+from datetime import timezone
+from datetime import datetime
 from typing import Union
 from sqlmodel import select
 from typing import List
@@ -14,10 +16,15 @@ class BaseService(Generic[T]):
         self.model = model
 
     def get(self, db: Session, uuid: UUID) -> Optional[T]:
-        return db.get(self.model, uuid)
+        obj = db.get(self.model, uuid)
+
+        if obj and getattr(obj, "is_deleted", False):
+            return None
+
+        return obj
 
     def get_all(self, db: Session, *, skip: int = 0, limit: int = 100) -> List[T]:
-        statement = select(self.model).offset(skip).limit(limit)
+        statement = select(self.model).where(self.model.is_deleted.is_(False)).offset(skip).limit(limit)
         return db.exec(statement).all()
 
     def create(self, db: Session, *, obj_in: T) -> T:
@@ -44,6 +51,7 @@ class BaseService(Generic[T]):
         obj = db.get(self.model, uuid)
         if obj:
             obj.is_deleted = True
+            obj.deleted_at = datetime.now(timezone.utc)
             db.add(obj)
             db.commit()
             db.refresh(obj)
