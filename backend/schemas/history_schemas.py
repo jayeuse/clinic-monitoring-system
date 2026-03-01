@@ -30,6 +30,27 @@ class MedicalHistoryCreate(BaseModel):
     surgery_notes: Optional[str] = None
     maintenance_medications: Optional[str] = None
 
+class MedicalHistoryUpdate(BaseModel):
+    smoking_status: Optional[SmokeStatus] = None
+    smoking_started_since: Optional[date] = None
+
+    drug_status: Optional[DrugStatus] = None
+    drug_name: Optional[str] = None
+    did_rehab: Optional[bool] = None
+
+    alcohol_status: Optional[AlcoholStatus] = None
+    alcohol_est_consumption: Optional[str] = None
+    
+    no_of_pregnancies: Optional[int] = None
+    no_of_miscarriages: Optional[int] = None
+    no_of_term_deliveries: Optional[int] = None
+    no_of_premature_deliveries: Optional[int] = None
+    total_children: Optional[int] = None
+    
+    surgery_notes: Optional[str] = None
+    maintenance_medications: Optional[str] = None
+
+
 class MedicalHistoryPublic(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

@@ -1,4 +1,4 @@
-from services.patient_service import patient_service
+from schemas.history_schemas import MedicalHistoryUpdate
 from fastapi import HTTPException
 from services.history_service import history_service
 from schemas.history_schemas import MedicalHistoryPublic
@@ -18,12 +18,25 @@ def create_medical_history(history_in: MedicalHistoryCreate, db: Session = Depen
 
 @router.get("/{patient_id}", response_model=MedicalHistoryPublic)
 def read_medical_history(patient_id: str, db: Session = Depends(get_session)):
-    patient = patient_service.get_by_patient_id(db, patient_id=patient_id)
-    if not patient:
-        raise HTTPException(status_code=404, detail="Patient not Found")
 
     history = history_service.get_by_patient_id(db, patient_id=patient_id)
     if not history:
         raise HTTPException(status_code=404, detail="Medical History not found for this patient")
 
     return history
+
+@router.patch("/{patient_id}", response_model=MedicalHistoryPublic)
+def update_medical_history(patient_id: str, history_out: MedicalHistoryUpdate, db: Session = Depends(get_session)):
+    db_obj = history_service.get_by_patient_id(db, patient_id=patient_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Medical History not found for this patient")
+    
+    return history_service.update(db, db_obj=db_obj, obj_in=history_out)
+
+@router.delete("/{patient_id}", response_model=MedicalHistoryPublic)
+def delete_medical_history(patient_id: str, db: Session = Depends(get_session)):
+    db_obj = history_service.get_by_patient_id(db, patient_id=patient_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Medical History not found for this patient")
+
+    return history_service.remove(db, uuid=db_obj.uuid)
