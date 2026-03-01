@@ -20,6 +20,12 @@ from schemas.clinic_schemas import (
 
 router = APIRouter(prefix="/clinic", tags=["Clinic Operations"])
 
+@router.get("/transactions/", response_model=GenericResponse[List[ClinicTransactionPublic]])
+def read_transactions(
+    db: Session = Depends(get_session), skip: int = 0, limit: int = 100
+):
+    get_transactions = clinic_service.get_all(db, skip=skip, limit=limit)
+    return GenericResponse(message="Transactions retrieved successfully", data=get_transactions)
 
 @router.post("/transactions/", response_model=GenericResponse[ClinicTransactionPublic])
 def create_transaction(
@@ -30,13 +36,6 @@ def create_transaction(
         return GenericResponse(message="Clinic Transaction recorded successfully", data=new_transaction)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
-
-@router.get("/transactions/", response_model=GenericResponse[List[ClinicTransactionPublic]])
-def read_transactions(
-    db: Session = Depends(get_session), skip: int = 0, limit: int = 100
-):
-    get_transactions = clinic_service.get_all(db, skip=skip, limit=limit)
-    return GenericResponse(message="Transactions retrieved successfully", data=get_transactions)
 
 @router.get("/transactions/{ct_id}", response_model=GenericResponse[ClinicTransactionPublic])
 def read_transaction(ct_id:str, db: Session = Depends(get_session)):

@@ -1,3 +1,4 @@
+from typing import List
 from schemas.base_schemas import GenericResponse
 from schemas.history_schemas import MedicalHistoryUpdate
 from fastapi import HTTPException
@@ -8,7 +9,13 @@ from fastapi import Depends
 from sqlmodel import Session
 from schemas.history_schemas import MedicalHistoryCreate
 from fastapi import APIRouter
-router = APIRouter(prefix="/history", tags=["Medical History"])
+
+router = APIRouter(prefix="/medical_history", tags=["Medical History"])
+
+@router.get("/", response_model=GenericResponse[List[MedicalHistoryPublic]])
+def read_all_medical_histories(db: Session = Depends(get_session), skip: int = 0, limit: int = 100):
+    get_all_medical_records = history_service.get_all(db, skip=skip, limit=limit)
+    return GenericResponse(message="All Medical Records retrieved successfully", data=get_all_medical_records)
 
 @router.post("/", response_model=GenericResponse[MedicalHistoryPublic])
 def create_medical_history(history_in: MedicalHistoryCreate, db: Session = Depends(get_session)):
