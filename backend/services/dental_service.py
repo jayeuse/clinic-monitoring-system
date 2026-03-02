@@ -61,6 +61,10 @@ class DentalExaminationService(BaseService[DentalRecordUpdate]):
 
         return db_obj
 
+    def get_by_dru_id(self, db: Session, dru_id: str) -> Optional[DentalRecordUpdate]:
+        statement = select(self.model).where(self.model.dru_id == dru_id, self.model.is_deleted.is_(False))
+        return db.exec(statement).first()
+
 class DentalTreatmentService(BaseService[DentalServiceRendered]):
     def __init__(self):
         super().__init__(DentalServiceRendered)
@@ -78,6 +82,10 @@ class DentalTreatmentService(BaseService[DentalServiceRendered]):
         db_obj = DentalServiceRendered(**obj_in.model_dump(exclude={"patient_id"}), dr_uuid=dr.uuid, dsr_id=dsr_id)
 
         return super().create(db, obj_in=db_obj)
+
+    def get_by_dsr_id(self, db: Session, dsr_id: str) -> Optional[DentalServiceRendered]:
+        statement = select(self.model).where(self.model.dsr_id == dsr_id, self.model.is_deleted.is_(False))
+        return db.exec(statement).first()
 
 dental_record_service = DentalRecordService()
 examination_service = DentalExaminationService()

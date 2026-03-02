@@ -48,6 +48,22 @@ class DentalExaminationCreate(BaseModel):
 
     findings: List[ToothFindingBase] = []
 
+class DentalExaminationUpdate(BaseModel):
+
+    head_findings: Optional[str] = None
+    face_findings: Optional[str] = None
+    tmj_findings: Optional[str] = None
+
+    periodontal_diagnosis: Optional[PeriodontalDiagnosis] = None
+    periodontitis_severity: Optional[SeverityType] = None
+    periodontal_others: Optional[str] = None
+
+    lips_findings: Optional[str] = None
+    palate_findings: Optional[str] = None
+    floor_of_mouth_findings: Optional[str] = None
+    tongue_findings: Optional[str] = None
+
+
 class DentalExaminationPublic(BaseModel):
     dru_id: str
     dr_uuid: UUID
@@ -73,6 +89,20 @@ class DentalTreatmentCreate(BaseModel):
     sealant: bool = False
     extraction: bool = False
     consultation: bool = False
+    others: Optional[str] = None
+    remarks: Optional[str] = None
+
+class DentalTreatmentUpdate(BaseModel):
+    
+    tooth_number: Optional[str] = None
+
+    oral_prophy: Optional[bool] = None
+    temp_filling: Optional[bool] = None 
+    perm_filling: Optional[bool] = None 
+    sealant: Optional[bool] = None
+    extraction: Optional[bool] = None
+    consultation: Optional[bool] = None
+
     others: Optional[str] = None
     remarks: Optional[str] = None
 
