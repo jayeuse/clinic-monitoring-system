@@ -48,7 +48,9 @@ class DentalRecord(BaseModel, table=True):
     
     chart_image_url: Optional[str] = Field(default=None, max_length=500)
 
-class DentalRecordUpdate(BaseModel, table=True):
+class DentalExamination(BaseModel, table=True):
+    __tablename__ = "dentalrecordupdate"
+    
     dru_id: str = Field(unique=True, index=True, max_length=20)
 
     dr_uuid: UUID = Field(foreign_key="dentalrecord.uuid")

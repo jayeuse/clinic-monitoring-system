@@ -3,7 +3,7 @@ from schemas.dental_schemas import DentalTreatmentCreate
 from models.dental import DentalServiceRendered
 from models.dental import ToothFinding
 from schemas.dental_schemas import DentalExaminationCreate
-from models.dental import DentalRecordUpdate
+from models.dental import DentalExamination
 from services.patient_service import patient_service
 from typing import Optional
 from sqlmodel import Session, func, select
@@ -21,11 +21,11 @@ class DentalRecordService(BaseService[DentalRecord]):
 
         return db.exec(select(self.model).where(self.model.patient_uuid == patient.uuid)).first()
 
-class DentalExaminationService(BaseService[DentalRecordUpdate]):
+class DentalExaminationService(BaseService[DentalExamination]):
     def __init__(self):
-        super().__init__(DentalRecordUpdate)
+        super().__init__(DentalExamination)
 
-    def record_exam(self, db: Session, *, obj_in: DentalExaminationCreate) -> DentalRecordUpdate:
+    def record_exam(self, db: Session, *, obj_in: DentalExaminationCreate) -> DentalExamination:
         dr_service = DentalRecordService()
 
         dr = dr_service.get_by_patient_id(db, patient_id=obj_in.patient_id)
@@ -44,7 +44,7 @@ class DentalExaminationService(BaseService[DentalRecordUpdate]):
         count_dx = db.exec(select(func.count()).select_from(self.model)).one()
         dru_id = f"DX-{count_dx + 1:06d}"
 
-        db_obj = DentalRecordUpdate(**obj_in.model_dump(exclude={"patient_id", "findings"}), dr_uuid=dr.uuid, dru_id=dru_id)
+        db_obj = DentalExamination(**obj_in.model_dump(exclude={"patient_id", "findings"}), dr_uuid=dr.uuid, dru_id=dru_id)
 
         db.add(db_obj)
         db.commit()
@@ -61,7 +61,7 @@ class DentalExaminationService(BaseService[DentalRecordUpdate]):
 
         return db_obj
 
-    def get_by_dru_id(self, db: Session, dru_id: str) -> Optional[DentalRecordUpdate]:
+    def get_by_dru_id(self, db: Session, dru_id: str) -> Optional[DentalExamination]:
         statement = select(self.model).where(self.model.dru_id == dru_id, self.model.is_deleted.is_(False))
         return db.exec(statement).first()
 
