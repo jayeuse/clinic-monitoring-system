@@ -36,7 +36,7 @@ class MedicalHistory(BaseModel, table=True):
 
     patient: "PatientInformation" = Relationship(back_populates="medical_history")
 
-    patient_uuid: UUID = Field(foreign_key="patientinformation.uuid", index=True)
+    patient_uuid: UUID = Field(foreign_key="patientinformation.uuid", index=True, unique=True)
 
     smoking_status: SmokeStatus = Field(default=SmokeStatus.NEVER)
     smoking_started_since: Optional[date] = Field(default=None)
@@ -71,7 +71,7 @@ class PatientDiagnosedConditions(BaseModel, table=True):
 class MedicalHistoryUpdate(BaseModel, table=True):
     mhu_id: str = Field(unique=True, index=True, max_length=20)
 
-    patient_uuid: UUID = Field(foreign_key="patientinformation.uuid")
+    patient_uuid: UUID = Field(foreign_key="patientinformation.uuid", index=True, unique=True)
     mh_uuid: UUID = Field(foreign_key="medicalhistory.uuid")
 
     # recorded_by = UUID = Field(foreign_key="user.uuid") To be added after auth + role based user access implementation

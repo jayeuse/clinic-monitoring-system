@@ -32,7 +32,7 @@ class ToothStatus(str, Enum):
 class DentalRecord(BaseModel, table=True):
     dr_id: str = Field(unique=True, index=True, max_length=20)
 
-    patient_uuid: UUID = Field(foreign_key="patientinformation.uuid")
+    patient_uuid: UUID = Field(foreign_key="patientinformation.uuid", index=True, unique=True)
     mh_uuid: UUID = Field(foreign_key="medicalhistory.uuid")
 
     last_dental_visit: Optional[date] = Field(default=None)
