@@ -146,3 +146,18 @@ class PatientFamilyHistoryPublic(BaseModel):
     mcl_id: str
     family_relation: str
 
+
+class PatientDiagnosedConditionsCreate(BaseModel):
+    mcl_id: str
+    date_diagnosed: Optional[date] = None
+
+class PatientDiagnosedConditionsUpdate(BaseModel):
+    mcl_id: Optional[str] = None
+    date_diagnosed: Optional[date] = None
+
+class PatientDiagnosedConditionsPublic(BaseModel):
+    pdc_id: str
+    mh_uuid: UUID
+    mcl_id: str
+    date_diagnosed: Optional[date] = None
+

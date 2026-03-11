@@ -15,8 +15,9 @@ from routers import (
     medical_examinations,
     medical_history,
     medical_treatments,
-    patient_family_history,
     patients,
+    patient_family_history,
+    patient_diagnosed_conditions,
 )
 
 
@@ -42,16 +43,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(clinic.router)
 app.include_router(patients.router)
 app.include_router(emergency_contacts.router)
-app.include_router(clinic.router)
+app.include_router(patient_family_history.router)
+app.include_router(patient_diagnosed_conditions.router)
 app.include_router(medical_history.router)
 app.include_router(medical_examinations.router)
 app.include_router(medical_treatments.router)
 app.include_router(dental_records.router)
 app.include_router(dental_examinations.router)
 app.include_router(dental_treatments.router)
-app.include_router(patient_family_history.router)
 app.include_router(lookups.router)
 
 @app.get("/")

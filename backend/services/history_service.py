@@ -1,3 +1,9 @@
+from typing import Any
+from typing import Dict
+from schemas.history_schemas import PatientDiagnosedConditionsUpdate
+from typing import Union
+from schemas.history_schemas import PatientDiagnosedConditionsCreate
+from models.history import PatientDiagnosedConditions
 from typing import List, Optional
 
 from sqlmodel import Session, func, select
@@ -329,9 +335,85 @@ class PatientFamilyHistoryService(BaseService[PatientFamilyHistory]):
 
         return db_obj
 
+class PatientDiagnosedConditionsService(BaseService[PatientDiagnosedConditions]):
+    def __init__(self):
+        super().__init__(PatientDiagnosedConditions)
+
+    def get_by_pdc_id(self, db: Session, pdc_id: str, include_deleted: bool = False) -> Optional[PatientDiagnosedConditions]:
+        statement = select(self.model).where(self.model.pdc_id == pdc_id)
+
+        if not include_deleted:
+            statement = statement.where(self.model.is_deleted.is_(False))
+        return db.exec(statement).first()
+
+    def get_by_mh_id(self, db: Session, mh_id: str) -> List[PatientDiagnosedConditions]:
+        history = history_service.get_by_mh_id(db, mh_id=mh_id)
+        if not history:
+            return []
+
+        statement = select(self.model).where(self.model.mh_uuid == history.uuid, self.model.is_deleted.is_(False))
+        return db.exec(statement).all()
+
+    def create(self, db: Session, *, obj_in: PatientDiagnosedConditionsCreate, mh_id: str) -> PatientDiagnosedConditions:
+        history = history_service.get_by_mh_id(db, mh_id=mh_id)
+        if not history:
+            raise ValueError(f"Medical History with ID {mh_id} not found.")
+
+        # Resolve condition lookup
+        from models.lookups import MedicalConditionsLookup
+        condition = db.exec(select(MedicalConditionsLookup).where(MedicalConditionsLookup.mcl_id == obj_in.mcl_id)).first()
+        if not condition:
+             raise ValueError(f"Condition with ID {obj_in.mcl_id} not found.")
+
+        # Generate custom string ID
+        statement = select(func.count()).select_from(self.model)
+        count = db.exec(statement).one()
+        new_id = f"PDC-{count + 1:06d}"
+
+        # Construct database object
+        db_obj = PatientDiagnosedConditions(
+            pdc_id=new_id,
+            mh_uuid=history.uuid,
+            mcl_uuid=condition.uuid,
+            date_diagnosed=obj_in.date_diagnosed
+        )
+
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+
+        return db_obj
+
+    def update(self, db: Session, *, db_obj: PatientDiagnosedConditions, obj_in: Union[PatientDiagnosedConditionsUpdate, Dict[str, Any]]) -> PatientDiagnosedConditions:
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.model_dump(exclude_unset=True)
+        
+        # Intercept mcl_id to swap it for mcl_uuid
+        if "mcl_id" in update_data:
+            from models.lookups import MedicalConditionsLookup
+            condition = db.exec(select(MedicalConditionsLookup).where(MedicalConditionsLookup.mcl_id == update_data["mcl_id"])).first()
+            if not condition:
+                 raise ValueError(f"Condition with ID {update_data['mcl_id']} not found.")
+            
+            update_data["mcl_uuid"] = condition.uuid
+            del update_data["mcl_id"]
+
+        # Apply updates
+        for field, value in update_data.items():
+            setattr(db_obj, field, value)
+
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+
+        return db_obj
+
 
 
 history_service = MedicalHistoryService()
 medical_examination_service = MedicalExaminationService()
 medical_treatment_service = MedicalTreatmentService()
 patient_family_history_service = PatientFamilyHistoryService()
+patient_diagnosed_conditions_service = PatientDiagnosedConditionsService()
