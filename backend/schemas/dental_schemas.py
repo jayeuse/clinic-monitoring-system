@@ -29,6 +29,8 @@ class ToothFindingCreate(ToothFindingBase):
 class ToothFindingPublic(ToothFindingBase):
     tf_id: str
 
+
+
 class DentalExaminationCreate(BaseModel):
     patient_id: str
     examination_date: date = Field(default_factory=date.today)
@@ -118,10 +120,32 @@ class DentalRecordCreate(BaseModel):
 
     last_dental_visit: Optional[date] = None
     reason_for_last_dental_visit: Optional[str] = None
+
+    last_hospitalization: Optional[date] = None
+    hospitalization_reason: Optional[str] = None
+
     known_allergies: Optional[str] = None
+    tobacco_use: Optional[str] = None
+    alcohol_drug_use: Optional[str] = None
+    for_women_status: Optional[str] = None
+    chart_image_url: Optional[str] = None
 
 class DentalRecordPublic(BaseModel):
     dr_id: str
     patient_uuid: UUID
     last_dental_visit: Optional[date]
     chart_image_url: Optional[str]
+
+class DentalRecordUpdate(BaseModel):
+    
+    last_dental_visit: Optional[date] = None
+    reason_for_last_dental_visit: Optional[str] = None
+
+    last_hospitalization: Optional[date] = None
+    hospitalization_reason: Optional[str] = None
+
+    known_allergies: Optional[str] = None
+    tobacco_use: Optional[str] = None
+    alcohol_drug_use: Optional[str] = None
+    for_women_status: Optional[str] = None
+    chart_image_url: Optional[str] = None

@@ -1,3 +1,4 @@
+from schemas.dental_schemas import ToothFindingPublic
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
@@ -47,6 +48,14 @@ def delete_dental_examination(dru_id: str, db: Session = Depends(get_session)):
     deleted = examination_service.remove(db, uuid=db_obj.uuid)
 
     return GenericResponse(message="Dental Examination deleted successfully", data=deleted)
+
+@router.get("/{dru_id}/findings", response_model=GenericResponse[List[ToothFindingPublic]])
+def read_examination_findings(dru_id: str, db: Session = Depends(get_session)):
+    try:
+        findings = examination_service.get_findings_by_exam(db, dru_id=dru_id)
+        return GenericResponse(message="Tooth findings retrieved successfully", data=findings)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 @router.get("/treatments/", response_model=GenericResponse[List[DentalTreatmentPublic]])
 def read_dental_treatments(db: Session = Depends(get_session)):

@@ -1,3 +1,5 @@
+from schemas.dental_schemas import DentalRecordCreate
+from typing import List
 from models.history import MedicalHistory
 from schemas.dental_schemas import DentalTreatmentCreate
 from models.dental import DentalServiceRendered
@@ -20,6 +22,31 @@ class DentalRecordService(BaseService[DentalRecord]):
             return None
 
         return db.exec(select(self.model).where(self.model.patient_uuid == patient.uuid)).first()
+
+    def create_record(self, db: Session, *, obj_in: DentalRecordCreate) -> DentalRecord:
+        patient = patient_service.get_by_patient_id(db, patient_id=obj_in.patient_id)
+        if not patient:
+            raise ValueError(f"Patient {obj_in.patient_id} not found")
+
+        existing_dr = self.get_by_patient_id(db, patient_id=obj_in.patient_id)
+        if existing_dr: 
+            raise ValueError(f"Patient {obj_in.patient_id} already has a Dental Record.")
+        
+        mh = db.exec(select(MedicalHistory).where(MedicalHistory.patient_uuid == patient.uuid)).first()
+        if not mh:
+            raise ValueError(f"Patient {obj_in.patient_id} has no Medical History. Please create one first.")
+
+        count = db.exec(select(func.count()).select_from(self.model)).one()
+        dr_id = f"DR-{count + 1:06d}"
+        
+        db_obj = DentalRecord(
+            **obj_in.model_dump(exclude={"patient_id"}),
+            dr_id=dr_id,
+            patient_uuid=patient.uuid,
+            mh_uuid=mh.uuid
+        )
+
+        return super().create(db, obj_in=db_obj)
 
 class DentalExaminationService(BaseService[DentalExamination]):
     def __init__(self):
@@ -64,6 +91,14 @@ class DentalExaminationService(BaseService[DentalExamination]):
     def get_by_dru_id(self, db: Session, dru_id: str) -> Optional[DentalExamination]:
         statement = select(self.model).where(self.model.dru_id == dru_id, self.model.is_deleted.is_(False))
         return db.exec(statement).first()
+
+    def get_findings_by_exam(self, db: Session, *, dru_id: str) -> List[ToothFinding]:
+        exam = self.get_by_dru_id(db, dru_id=dru_id)
+        if not exam:
+            return []
+
+        statement = select(ToothFinding).where(ToothFinding.dru_uuid == exam.uuid)
+        return db.exec(statement).all()
 
 class DentalTreatmentService(BaseService[DentalServiceRendered]):
     def __init__(self):
