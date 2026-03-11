@@ -53,7 +53,7 @@ class DentalExamination(BaseModel, table=True):
     
     dru_id: str = Field(unique=True, index=True, max_length=20)
 
-    dr_uuid: UUID = Field(foreign_key="dentalrecord.uuid")
+    dr_uuid: UUID = Field(foreign_key="dentalrecord.uuid", index=True, unique=True)
 
     # examined_by: UUID = Field(foreign_key="user.uuid") -> Noted for later
     examination_date: date = Field(default_factory=date.today)
