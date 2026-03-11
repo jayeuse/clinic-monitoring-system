@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlmodel import Field, TEXT
 from models.base import BaseModel
 from enum import Enum
+from datetime import datetime, timezone
 
 class PeriodontalDiagnosis(str, Enum):
     HEALTHY = "HEALTHY"
@@ -100,4 +101,46 @@ class DentalServiceRendered(BaseModel, table=True):
 
     others: Optional[str] = Field(default=None, sa_type=TEXT)
     remarks: Optional[str] = Field(default=None, sa_type=TEXT)
+
+class DentalRecordSnapshot(BaseModel, table=True):
+
+    snapshot_id: str = Field(unique=True, index=True, max_length=20)
+    original_dr_uuid: UUID = Field(foreign_key="dentalrecord.uuid", index=True)
+    snapshot_date: datetime = Field(default_factory=lambda:datetime.now(timezone.utc))
+
+    last_dental_visit: Optional[date] = Field(default=None)
+    reason_for_last_dental_visit: Optional[str] = Field(default=None, sa_type=TEXT)
+
+    last_hospitalization: Optional[date] = Field(default=None)
+    hospitalization_reason: Optional[str] = Field(default=None, sa_type=TEXT)
+    
+    known_allergies: Optional[str] = Field(default=None, sa_type=TEXT)
+    tobacco_use: Optional[str] = Field(default=None, sa_type=TEXT)
+    alcohol_drug_use: Optional[str] = Field(default=None, sa_type=TEXT)
+    for_women_status: Optional[str] = Field(default=None, sa_type=TEXT)
+    
+    chart_image_url: Optional[str] = Field(default=None, max_length=500)
+
+class DentalExaminationSnapshot(BaseModel, table=True):
+
+    snapshot_id: str = Field(unique=True, index=True, max_length=20)
+    original_dr_uuid: UUID = Field(foreign_key="dentalrecordupdate.uuid", index=True)
+    snapshot_date: datetime = Field(default_factory=lambda:datetime.now(timezone.utc))
+
+    # examined_by: UUID = Field(foreign_key="user.uuid") -> Noted for later
+    examination_date: date = Field(default_factory=date.today)
+
+    head_findings: Optional[str] = Field(default="WNL", max_length=255)
+    face_findings: Optional[str] = Field(default="WNL", max_length=255)
+    tmj_findings: Optional[str] = Field(default="WNL", max_length=255)
+
+    periodontal_diagnosis: Optional[PeriodontalDiagnosis] = Field(default=None)
+    periodontitis_severity: Optional[SeverityType] = Field(default=None)
+    periodontal_others: Optional[str] = Field(default=None, sa_type=TEXT)
+
+    #Intraoral Tissues
+    lips_findings: Optional[str] = Field(default="WNL", max_length=255)
+    palate_findings: Optional[str] = Field(default="WNL", max_length=255)
+    floor_of_mouth_findings: Optional[str] = Field(default="WNL", max_length=255)
+    tongue_findings: Optional[str] = Field(default="WNL", max_length=255)
 

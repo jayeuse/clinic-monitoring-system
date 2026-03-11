@@ -1,3 +1,5 @@
+from datetime import timezone
+from datetime import datetime
 from sqlmodel import Relationship
 from datetime import date
 from typing import Optional, TYPE_CHECKING
@@ -84,3 +86,35 @@ class MHUSystemFindings(BaseModel, table=True):
 
     status: BodySystemStatus = Field(default=BodySystemStatus.NOT_ASSESSED)
     condition_notes: Optional[str] = Field(default=None, sa_type=TEXT)
+
+class MedicalHistorySnapshot(BaseModel, table=True):
+
+    snapshot_id:str = Field(unique=True, index=True, max_length=20)
+    original_mh_uuid: UUID = Field(foreign_key="medicalhistory.uuid", index=True)
+    snapshot_date: datetime = Field(default_factory=lambda:datetime.now(timezone.utc))
+
+    smoking_status: SmokeStatus = Field(default=SmokeStatus.NEVER)
+    smoking_started_since: Optional[date] = Field(default=None)
+
+    drug_status: DrugStatus = Field(default=DrugStatus.NEVER)
+    drug_name: Optional[str] = Field(default=None)
+    did_rehab: Optional[bool] = Field(default=None)
+
+    alcohol_status: AlcoholStatus = Field(default=AlcoholStatus.NEVER)
+    alcohol_est_consumption: Optional[str] = Field(default=None)
+
+    no_of_pregnancies: Optional[int] = Field(default=None)
+    no_of_miscarriages: Optional[int] = Field(default=None)
+    no_of_term_deliveries: Optional[int] = Field(default=None)
+    no_of_premature_deliveries: Optional[int] = Field(default=None)
+    total_children: Optional[int] = Field(default=None)
+
+    surgery_notes: Optional[str] = Field(default=None, sa_type=TEXT)
+    maintenance_medications: Optional[str] = Field(default=None, sa_type=TEXT)
+
+
+class MedicalExaminationSnapshot(BaseModel, table=True):
+    snapshot_id: str = Field(unique=True, index=True, max_length=20)
+    original_mhu_uuid: UUID = Field(foreign_key="medicalhistoryupdate.uuid", index=True)
+    snapshot_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    date_taken: date = Field(default_factory=date.today)
