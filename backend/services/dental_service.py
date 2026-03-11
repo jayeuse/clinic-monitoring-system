@@ -26,12 +26,17 @@ class DentalRecordService(BaseService[DentalRecord]):
     def __init__(self):
         super().__init__(DentalRecord)
 
-    def get_by_patient_id(self, db: Session, patient_id: str) -> Optional[DentalRecord]:
+    def get_by_patient_id(self, db: Session, patient_id: str, include_deleted: bool = False) -> Optional[DentalRecord]:
         patient = patient_service.get_by_patient_id(db, patient_id=patient_id)
         if not patient:
             return None
 
-        return db.exec(select(self.model).where(self.model.patient_uuid == patient.uuid)).first()
+        statement = select(self.model).where(self.model.patient_uuid == patient.uuid)
+
+        if not include_deleted:
+            statement = statement.where(self.model.is_deleted.is_(False))
+
+        return db.exec(statement).first()
 
     def create(self, db: Session, *, obj_in: DentalRecordCreate) -> DentalRecord:
         patient = patient_service.get_by_patient_id(db, patient_id=obj_in.patient_id)
@@ -209,8 +214,12 @@ class DentalExaminationService(BaseService[DentalExamination]):
         )
         return db.exec(statement).all()
     
-    def get_by_dru_id(self, db: Session, dru_id: str) -> Optional[DentalExamination]:
-        statement = select(self.model).where(self.model.dru_id == dru_id, self.model.is_deleted.is_(False))
+    def get_by_dru_id(self, db: Session, dru_id: str, include_deleted: bool = False) -> Optional[DentalExamination]:
+        statement = select(self.model).where(self.model.dru_id == dru_id)
+
+        if not include_deleted:
+            statement = statement.where(self.model.is_deleted.is_(False))
+
         return db.exec(statement).first()
 
     def get_findings_by_exam(self, db: Session, *, dru_id: str) -> List[ToothFinding]:
@@ -251,8 +260,12 @@ class DentalTreatmentService(BaseService[DentalServiceRendered]):
         return db.exec(statement).all()
 
     
-    def get_by_dsr_id(self, db: Session, dsr_id: str) -> Optional[DentalServiceRendered]:
-        statement = select(self.model).where(self.model.dsr_id == dsr_id, self.model.is_deleted.is_(False))
+    def get_by_dsr_id(self, db: Session, dsr_id: str, include_deleted: bool = False) -> Optional[DentalServiceRendered]:
+        statement = select(self.model).where(self.model.dsr_id == dsr_id)
+
+        if not include_deleted:
+            statement = statement.where(self.model.is_deleted.is_(False))
+
         return db.exec(statement).first()
 
 dental_record_service = DentalRecordService()

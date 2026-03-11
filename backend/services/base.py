@@ -58,3 +58,14 @@ class BaseService(Generic[T]):
             db.refresh(obj)
 
         return obj
+
+    def restore(self, db: Session, *, uuid: UUID) -> T:
+        obj = db.get(self.model, uuid)
+        if obj and obj.is_deleted:
+            obj.is_deleted = False
+            obj.deleted_at = None
+            db.add(obj)
+            db.commit()
+            db.refresh(obj)
+
+        return obj

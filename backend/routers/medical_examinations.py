@@ -67,3 +67,19 @@ def delete_medical_examination(me_id: str, db: Session = Depends(get_session)):
 
     medical_examination_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Medical Record deleted successfully")
+
+@router.post("/{me_id}/restore", response_model=GenericResponse[MedicalExaminationPublic])
+def restore_medical_examination(
+    me_id: str,
+    db: Session = Depends(get_session)
+):
+    db_obj = medical_examination_service.get_by_me_id(db, me_id=me_id, include_deleted=True)
+
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Medical examination not found")
+        
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=400, detail="Medical examination is not deleted")
+
+    restored_exam = medical_examination_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Medical examination restored successfully", data=restored_exam)

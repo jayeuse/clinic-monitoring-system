@@ -61,3 +61,19 @@ def delete_dental_treatment(dsr_id: str, db: Session = Depends(get_session)):
 
     treatment_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Dental Treatment deleted successfully")
+
+@router.post("/{dsr_id}/restore", response_model=GenericResponse[DentalTreatmentPublic])
+def restore_dental_treatment(
+    dsr_id: str,
+    db: Session = Depends(get_session)
+):
+    db_obj = treatment_service.get_by_dsr_id(db, dsr_id=dsr_id, include_deleted=True)
+
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Dental treatment not found")
+        
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=400, detail="Dental treatment is not deleted")
+
+    restored_treatment = treatment_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Dental treatment restored successfully", data=restored_treatment)

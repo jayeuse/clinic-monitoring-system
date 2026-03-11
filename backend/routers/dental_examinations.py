@@ -73,3 +73,18 @@ def read_examination_findings(dru_id: str, db: Session = Depends(get_session)):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+@router.post("/{dru_id}/restore", response_model=GenericResponse[DentalExaminationPublic])
+def restore_dental_examination(
+    dru_id: str,
+    db: Session = Depends(get_session)
+):
+    db_obj = examination_service.get_by_dru_id(db, dru_id=dru_id, include_deleted=True)
+
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Dental examination not found")
+        
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=400, detail="Dental examination is not deleted")
+
+    restored_exam = examination_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Dental examination restored successfully", data=restored_exam)

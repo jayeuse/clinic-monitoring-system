@@ -94,3 +94,19 @@ def delete_patient_family_history(
 
     deleted_history = patient_family_history_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Patient Family History deleted successfully", data=deleted_history)
+
+@router.post("/{pfh_id}/restore", response_model=GenericResponse[PatientFamilyHistoryPublic])
+def restore_patient_family_history(
+    pfh_id: str,
+    db: Session = Depends(get_session)
+):
+    db_obj = patient_family_history_service.get_by_pfh_id(db, pfh_id=pfh_id, include_deleted=True)
+
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Patient family history not found")
+        
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=400, detail="Patient family history is not deleted")
+
+    restored_family_history = patient_family_history_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Patient family history restored successfully", data=restored_family_history)

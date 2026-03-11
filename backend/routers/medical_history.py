@@ -94,3 +94,16 @@ def delete_medical_history(mh_id: str, db: Session = Depends(get_session)):
 
     history_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Medical Record deleted successfully")
+
+@router.post("/{mh_id}", response_model=GenericResponse[MedicalHistoryPublic])
+def restore_medical_history(mh_id: str, db: Session = Depends(get_session)):
+    db_obj = history_service.get_by_mh_id(db, mh_id=mh_id, include_deleted=True)
+
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Medical History not found.")
+
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=404, detail="Medical History is not deleted.")
+
+    restored_history = history_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Medical History restored successfully.", data=restored_history)

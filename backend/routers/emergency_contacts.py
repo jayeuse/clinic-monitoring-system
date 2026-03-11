@@ -90,3 +90,19 @@ def delete_emergency_contact(
 
     deleted_contact = emergency_contact_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Emergency Contact deleted successfully", data=deleted_contact)
+
+@router.post("/{ec_id}/restore", response_model=GenericResponse[EmergencyContactPublic])
+def restore_emergency_contact(
+    ec_id: str,
+    db: Session = Depends(get_session)
+):
+    db_obj = emergency_contact_service.get_by_ec_id(db, ec_id=ec_id, include_deleted=True)
+
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Emergency contact not found")
+        
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=400, detail="Emergency contact is not deleted")
+
+    restored_contact = emergency_contact_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Emergency contact restored successfully", data=restored_contact)

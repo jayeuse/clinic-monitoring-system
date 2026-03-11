@@ -73,6 +73,22 @@ def delete_transaction(ct_id: str, db: Session = Depends(get_session)):
     delete_transaction = clinic_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Transaction deleted successfully", data=delete_transaction)
 
+@router.post("/transactions/{ct_id}/restore", response_model=GenericResponse[ClinicTransactionPublic])
+def restore_clinic_transaction(
+    ct_id: str,
+    db: Session = Depends(get_session)
+):
+    db_obj = clinic_service.get_by_ct_id(db, ct_id=ct_id, include_deleted=True)
+
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Clinic transaction not found")
+        
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=400, detail="Clinic transaction is not deleted")
+
+    restored_ct = clinic_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Clinic transaction restored successfully", data=restored_ct)
+
 # VITAL SIGNS
 @router.get("/vital-signs/", response_model=GenericResponse[List[VitalSignsPublic]])
 def read_vital_signs(
@@ -127,3 +143,18 @@ def delete_vital_sign(vs_id: str, db: Session = Depends(get_session)):
     delete_vital_sign = vital_signs_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Vital Sign deleted successfully", data=delete_vital_sign)
 
+@router.post("/vital-signs/{vs_id}/restore", response_model=GenericResponse[VitalSignsPublic])
+def restore_vital_signs(
+    vs_id: str,
+    db: Session = Depends(get_session)
+):
+    db_obj = vital_signs_service.get_by_vs_id(db, vs_id=vs_id, include_deleted=True)
+
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Vital signs record not found")
+        
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=400, detail="Vital signs record is not deleted")
+
+    restored_vs = vital_signs_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Vital signs record restored successfully", data=restored_vs)

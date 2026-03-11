@@ -12,10 +12,11 @@ class EmergencyContactService(BaseService[EmergencyContact]):
     def __init__(self):
         super().__init__(EmergencyContact)
 
-    def get_by_ec_id(self, db: Session, ec_id: str) -> Optional[EmergencyContact]:
-        statement = select(self.model).where(
-            self.model.ec_id == ec_id, self.model.is_deleted.is_(False)
-        )
+    def get_by_ec_id(self, db: Session, ec_id: str, include_deleted: bool = False) -> Optional[EmergencyContact]:
+        statement = select(self.model).where(self.model.ec_id == ec_id)
+
+        if not include_deleted:
+            statement = statement.where(self.model.is_deleted.is_(False))
         return db.exec(statement).first()
 
     def get_by_patient_id(self, db: Session, patient_id: str) -> List[EmergencyContact]:

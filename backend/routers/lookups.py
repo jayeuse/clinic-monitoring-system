@@ -95,6 +95,19 @@ def delete_department(
     deleted_department = departments_lookup_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Department deleted successfully", data=deleted_department)
 
+@router.post("/departments/{dl_id}/restore", response_model=GenericResponse[DepartmentsLookupPublic])
+def restore_department_lookup(
+    dl_id: str,
+    db: Session = Depends(get_session)
+):
+    db_obj = departments_lookup_service.get_by_dl_id(db, dl_id=dl_id, include_deleted=True)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Department lookup not found")
+        
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=400, detail="Department lookup is not deleted")
+    restored_dept = departments_lookup_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Department lookup restored successfully", data=restored_dept)
 
 # --- Medical Conditions Lookup Endpoints ---
 
@@ -163,6 +176,19 @@ def delete_medical_condition(
     deleted_condition = medical_conditions_lookup_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Medical Condition deleted successfully", data=deleted_condition)
 
+@router.post("/medical-conditions/{mcl_id}/restore", response_model=GenericResponse[MedicalConditionsLookupPublic])
+def restore_medical_condition_lookup(
+    mcl_id: str,
+    db: Session = Depends(get_session)
+):
+    db_obj = medical_conditions_lookup_service.get_by_mcl_id(db, mcl_id=mcl_id, include_deleted=True)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Medical condition lookup not found")
+        
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=400, detail="Medical condition lookup is not deleted")
+    restored_condition = medical_conditions_lookup_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Medical condition lookup restored successfully", data=restored_condition)
 
 # --- Smoking Types Lookup Endpoints ---
 
@@ -230,6 +256,19 @@ def delete_smoking_type(
     deleted_type = smoking_types_lookup_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Smoking Type deleted successfully", data=deleted_type)
 
+@router.post("/smoking-types/{stl_id}/restore", response_model=GenericResponse[SmokingTypesLookupPublic])
+def restore_smoking_type_lookup(
+    stl_id: str,
+    db: Session = Depends(get_session)
+):
+    db_obj = smoking_types_lookup_service.get_by_stl_id(db, stl_id=stl_id, include_deleted=True)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Smoking type lookup not found")
+        
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=400, detail="Smoking type lookup is not deleted")
+    restored_smoking = smoking_types_lookup_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Smoking type lookup restored successfully", data=restored_smoking)
 
 # --- Body Systems Lookup Endpoints ---
 
@@ -296,3 +335,17 @@ def delete_body_system(
     
     deleted_system = body_systems_lookup_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Body System deleted successfully", data=deleted_system)
+
+@router.post("/body-systems/{bsl_id}/restore", response_model=GenericResponse[BodySystemsLookupPublic])
+def restore_body_system_lookup(
+    bsl_id: str,
+    db: Session = Depends(get_session)
+):
+    db_obj = body_systems_lookup_service.get_by_bsl_id(db, bsl_id=bsl_id, include_deleted=True)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Body system lookup not found")
+        
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=400, detail="Body system lookup is not deleted")
+    restored_system = body_systems_lookup_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Body system lookup restored successfully", data=restored_system)

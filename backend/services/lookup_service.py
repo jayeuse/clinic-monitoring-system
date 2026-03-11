@@ -21,10 +21,12 @@ class DepartmentsLookupService(BaseService[DepartmentsLookup]):
     def __init__(self):
         super().__init__(DepartmentsLookup)
 
-    def get_by_dl_id(self, db: Session, dl_id: str) -> Optional[DepartmentsLookup]:
-        statement = select(self.model).where(
-            self.model.dl_id == dl_id, self.model.is_deleted.is_(False)
-        )
+    def get_by_dl_id(self, db: Session, dl_id: str, include_deleted: bool = False) -> Optional[DepartmentsLookup]:
+        statement = select(self.model).where(self.model.dl_id == dl_id)
+
+        if not include_deleted:
+            statement = statement.where(self.model.is_deleted.is_(False))
+
         return db.exec(statement).first()
 
     def create(self, db: Session, *, obj_in: DepartmentsLookupCreate) -> DepartmentsLookup:
@@ -43,10 +45,12 @@ class MedicalConditionsLookupService(BaseService[MedicalConditionsLookup]):
     def __init__(self):
         super().__init__(MedicalConditionsLookup)
 
-    def get_by_mcl_id(self, db: Session, mcl_id: str) -> Optional[MedicalConditionsLookup]:
-        statement = select(self.model).where(
-            self.model.mcl_id == mcl_id, self.model.is_deleted.is_(False)
-        )
+    def get_by_mcl_id(self, db: Session, mcl_id: str, include_deleted: bool = False) -> Optional[MedicalConditionsLookup]:
+        statement = select(self.model).where(self.model.mcl_id == mcl_id)
+
+        if not include_deleted:
+            statement = statement.where(self.model.is_deleted.is_(False))
+
         return db.exec(statement).first()
 
     def create(self, db: Session, *, obj_in: MedicalConditionsLookupCreate) -> MedicalConditionsLookup:
@@ -87,10 +91,12 @@ class BodySystemsLookupService(BaseService[BodySystemsLookup]):
     def __init__(self):
         super().__init__(BodySystemsLookup)
 
-    def get_by_bsl_id(self, db: Session, bsl_id: str) -> Optional[BodySystemsLookup]:
-        statement = select(self.model).where(
-            self.model.bsl_id == bsl_id, self.model.is_deleted.is_(False)
-        )
+    def get_by_bsl_id(self, db: Session, bsl_id: str, include_deleted: bool = False) -> Optional[BodySystemsLookup]:
+        statement = select(self.model).where(self.model.bsl_id == bsl_id)
+
+        if not include_deleted:
+            statement = statement.where(self.model.is_deleted.is_(False))
+            
         return db.exec(statement).first()
 
     def create(self, db: Session, *, obj_in: BodySystemsLookupCreate) -> BodySystemsLookup:

@@ -68,3 +68,19 @@ def delete_medical_treatment(mt_id: str, db: Session = Depends(get_session)):
 
     treatment = medical_treatment_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Medical Treatment record deleted successfully.", data=treatment)
+
+@router.post("/{mt_id}/restore", response_model=GenericResponse[MedicalTreatmentPublic])
+def restore_medical_treatment(
+    mt_id: str,
+    db: Session = Depends(get_session)
+):
+    db_obj = medical_treatment_service.get_by_mt_id(db, mt_id=mt_id, include_deleted=True)
+
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Medical treatment not found")
+        
+    if not db_obj.is_deleted:
+        raise HTTPException(status_code=400, detail="Medical treatment is not deleted")
+
+    restored_treatment = medical_treatment_service.restore(db, uuid=db_obj.uuid)
+    return GenericResponse(message="Medical treatment restored successfully", data=restored_treatment)
