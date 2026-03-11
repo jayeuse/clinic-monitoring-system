@@ -127,3 +127,11 @@ class MedicalTreatment(BaseModel, table=True):
     date_taken: date = Field(default_factory=date.today)
     physician_notes: Optional[str] = Field(default=None, sa_type=TEXT)
     nurse_notes: Optional[str] = Field(default=None, sa_type=TEXT)
+
+class PatientFamilyHistory(BaseModel, table=True):
+    pfh_id: str = Field(unique=True, index=True, max_length=20)
+
+    mh_uuid: UUID = Field(foreign_key="medicalhistory.uuid")
+    mcl_uuid: UUID = Field(foreign_key="medicalconditionslookup.uuid")
+
+    family_relation: str = Field(max_length=100)

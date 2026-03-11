@@ -9,6 +9,7 @@ from models.history import (
     MedicalHistory,
     MedicalHistorySnapshot,
     MedicalTreatment,
+    PatientFamilyHistory,
 )
 from schemas.history_schemas import (
     MedicalExaminationCreate,
@@ -17,6 +18,8 @@ from schemas.history_schemas import (
     MedicalHistoryUpdate,
     MedicalTreatmentCreate,
     MedicalTreatmentUpdate,
+    PatientFamilyHistoryCreate,
+    PatientFamilyHistoryUpdate,
 )
 from services.base import BaseService
 from services.patient_service import patient_service
@@ -252,7 +255,73 @@ class MedicalTreatmentService(BaseService[MedicalTreatment]):
 
         return db_obj
 
+class PatientFamilyHistoryService(BaseService[PatientFamilyHistory]):
+    def __init__(self):
+        super().__init__(PatientFamilyHistory)
+
+    def get_by_pfh_id(self, db: Session, pfh_id: str) -> Optional[PatientFamilyHistory]:
+        statement = select(self.model).where(self.model.pfh_id == pfh_id, self.model.is_deleted.is_(False))
+        return db.exec(statement).first()
+
+    def get_by_mh_id(self, db: Session, mh_id: str) -> List[PatientFamilyHistory]:
+        history = history_service.get_by_mh_id(db, mh_id=mh_id)
+        if not history:
+            return []
+
+        statement = select(self.model).where(self.model.mh_uuid == history.uuid, self.model.is_deleted.is_(False))
+        return db.exec(statement).all()
+
+    def create(self, db: Session, *, obj_in: PatientFamilyHistoryCreate, mh_id: str) -> PatientFamilyHistory:
+        history = history_service.get_by_mh_id(db, mh_id=mh_id)
+        if not history:
+            raise ValueError(f"Medical History with ID {mh_id} not found.")
+
+        statement = select(func.count()).select_from(self.model)
+        count = db.exec(statement).one()
+        new_id = f"PFH-{count + 1:06d}"
+
+        from models.lookups import MedicalConditionsLookup
+        condition = db.exec(select(MedicalConditionsLookup).where(MedicalConditionsLookup.mcl_id == obj_in.mcl_id)).first()
+        if not condition:
+             raise ValueError(f"Condition with ID {obj_in.mcl_id} not found.")
+
+        db_obj = PatientFamilyHistory(
+            pfh_id=new_id,
+            mh_uuid=history.uuid,
+            mcl_uuid=condition.uuid,
+            family_relation=obj_in.family_relation
+        )
+
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+
+        return db_obj
+
+    def update(self, db: Session, *, db_obj: PatientFamilyHistory, obj_in: PatientFamilyHistoryUpdate) -> PatientFamilyHistory:
+        update_data = obj_in.model_dump(exclude_unset=True)
+        
+        if "mcl_id" in update_data:
+            from models.lookups import MedicalConditionsLookup
+            condition = db.exec(select(MedicalConditionsLookup).where(MedicalConditionsLookup.mcl_id == update_data["mcl_id"])).first()
+            if not condition:
+                 raise ValueError(f"Condition with ID {update_data['mcl_id']} not found.")
+            
+            update_data["mcl_uuid"] = condition.uuid
+            del update_data["mcl_id"]
+
+        for field, value in update_data.items():
+            setattr(db_obj, field, value)
+
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+
+        return db_obj
+
+
 
 history_service = MedicalHistoryService()
 medical_examination_service = MedicalExaminationService()
 medical_treatment_service = MedicalTreatmentService()
+patient_family_history_service = PatientFamilyHistoryService()

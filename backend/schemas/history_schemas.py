@@ -131,3 +131,18 @@ class MedicalTreatmentPublic(BaseModel):
     date_taken: Optional[date] = None
     physician_notes: Optional[str] = None
     nurse_notes: Optional[str] = None
+
+class PatientFamilyHistoryCreate(BaseModel):
+    mcl_id: str
+    family_relation: str
+
+class PatientFamilyHistoryUpdate(BaseModel):
+    mcl_id: Optional[str] = None
+    family_relation: Optional[str] = None
+
+class PatientFamilyHistoryPublic(BaseModel):
+    pfh_id: str
+    mh_id: str
+    mcl_id: str
+    family_relation: str
+
