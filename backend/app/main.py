@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from core.database import create_database
 
-from routers import patients, clinic, medical_history, dental_records, dental_examinations
+from routers import patients, clinic, medical_history, medical_examinations, dental_records, dental_examinations
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,6 +31,7 @@ app.add_middleware(
 app.include_router(patients.router)
 app.include_router(clinic.router)
 app.include_router(medical_history.router)
+app.include_router(medical_examinations.router)
 app.include_router(dental_records.router)
 app.include_router(dental_examinations.router)
 

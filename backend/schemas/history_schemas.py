@@ -1,3 +1,5 @@
+from models.history import BodySystemStatus
+from uuid import UUID
 from pydantic import Field, computed_field
 from typing import Any
 from pydantic import ConfigDict
@@ -79,3 +81,36 @@ class MedicalHistoryPublic(BaseModel):
     @property
     def patient_id(self) -> str:
         return self.patient.patient_id if self.patient else "UNK-000000"
+
+class MedicalExaminationFindingsCreate(BaseModel):
+    bsl_uuid: UUID
+    status: BodySystemStatus = BodySystemStatus.NOT_ASSESSED
+    condition_notes: Optional[str] = None
+
+class MedicalExaminationFindingsPublic(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    me_uuid: UUID
+    bsl_uuid: UUID
+    status: BodySystemStatus
+    condition_notes: Optional[str]
+
+
+class MedicalExaminationCreate(BaseModel):
+    patient_id: str
+    mh_id: str
+    date_taken: Optional[date] = None
+
+    findings: Optional[list[MedicalExaminationFindingsCreate]] = None
+
+class MedicalExaminationUpdate(BaseModel):
+    date_taken: Optional[date] = None
+    findings: Optional[list[MedicalExaminationFindingsCreate]] = None
+
+class MedicalExaminationPublic(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    me_id: str
+    patient_uuid: UUID
+    mh_uuid: UUID
+    date_taken: date
+
+    findings: Optional[list[MedicalExaminationFindingsPublic]] = None
