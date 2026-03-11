@@ -5,8 +5,14 @@ from core.database import get_session
 from schemas.base_schemas import GenericResponse
 from schemas.dental_schemas import DentalRecordPublic, DentalRecordUpdate
 from services.dental_service import dental_record_service
+from typing import List
 
 router = APIRouter(prefix="/dental_records", tags=["Dental Records"])
+
+@router.get("/", response_model=GenericResponse[List[DentalRecordPublic]])
+def read_all_dental_records(skip: int = 0, limit: int = 100, db: Session = Depends(get_session)):
+    records = dental_record_service.get_all(db, skip=skip, limit=limit)
+    return GenericResponse(message="All Dental Records retrieved successfully", data=records)
 
 @router.get("/{patient_id}", response_model=GenericResponse[DentalRecordPublic])
 def read_dental_record(patient_id: str, db: Session = Depends(get_session)):
@@ -41,5 +47,4 @@ def delete_dental_record(patient_id: str, db: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Dental Record not found")
 
     deleted_record = dental_record_service.remove(db, uuid=db_obj.uuid)
-
     return GenericResponse(message="Dental Record deleted successfully", data=deleted_record)

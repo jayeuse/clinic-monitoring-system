@@ -36,7 +36,6 @@ def update_dental_examination(dru_id: str, obj_in: DentalExaminationUpdate, db: 
         raise HTTPException(status_code=404, detail="Dental Examination not found")
 
     updated = examination_service.update(db, db_obj=db_obj, obj_in=obj_in)
-
     return GenericResponse(message="Dental Examination updated successfully", data=updated)
 
 @router.delete("/{dru_id}", response_model=GenericResponse[DentalExaminationPublic])
@@ -46,7 +45,6 @@ def delete_dental_examination(dru_id: str, db: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Dental Examination not found")
 
     deleted = examination_service.remove(db, uuid=db_obj.uuid)
-
     return GenericResponse(message="Dental Examination deleted successfully", data=deleted)
 
 @router.get("/{dru_id}/findings", response_model=GenericResponse[List[ToothFindingPublic]])
@@ -77,7 +75,6 @@ def update_dental_treatment(dsr_id: str, obj_in: DentalTreatmentUpdate, db: Sess
         raise HTTPException(status_code=404, detail="Dental Treatment not found")
 
     updated = treatment_service.update(db, db_obj=db_obj, obj_in=obj_in)
-
     return GenericResponse(message="Dental Treatment updated successfully", data=updated)
 
 @router.delete("/treatments/{dsr_id}", response_model=GenericResponse[DentalTreatmentPublic])
@@ -87,5 +84,4 @@ def delete_dental_treatment(dsr_id: str, db: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Dental Treatment not found")
 
     treatment_service.remove(db, uuid=db_obj.uuid)
-
     return GenericResponse(message="Dental Treatment deleted successfully")
