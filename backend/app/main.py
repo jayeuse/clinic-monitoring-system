@@ -11,6 +11,7 @@ from routers import (
     dental_records,
     dental_treatments,
     emergency_contacts,
+    lookups,
     medical_examinations,
     medical_history,
     medical_treatments,
@@ -51,6 +52,7 @@ app.include_router(dental_records.router)
 app.include_router(dental_examinations.router)
 app.include_router(dental_treatments.router)
 app.include_router(patient_family_history.router)
+app.include_router(lookups.router)
 
 @app.get("/")
 def read_root():
