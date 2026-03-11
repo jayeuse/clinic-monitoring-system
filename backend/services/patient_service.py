@@ -1,20 +1,17 @@
-from schemas.patient_schemas import PersonnelTypeUpdate
-from typing import Any
-from typing import Dict
-from schemas.patient_schemas import StudentTypeUpdate
-from typing import Union
-from schemas.patient_schemas import PersonnelTypeCreate
-from models.patients import PersonnelType
-from services.lookup_service import departments_lookup_service
-from schemas.patient_schemas import StudentTypeCreate
-from models.patients import StudentType
-from typing import Optional
+from typing import Any, Dict, Optional, Union
 
 from sqlmodel import Session, func, select
 
-from models.patients import PatientInformation
-from schemas.patient_schemas import PatientCreate
+from models.patients import PatientInformation, PersonnelType, StudentType
+from schemas.patient_schemas import (
+    PatientCreate,
+    PersonnelTypeCreate,
+    PersonnelTypeUpdate,
+    StudentTypeCreate,
+    StudentTypeUpdate,
+)
 from services.base import BaseService
+from services.lookup_service import departments_lookup_service
 
 
 class PatientService(BaseService[PatientInformation]):

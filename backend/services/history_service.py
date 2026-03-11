@@ -1,10 +1,4 @@
-from typing import Any
-from typing import Dict
-from schemas.history_schemas import PatientDiagnosedConditionsUpdate
-from typing import Union
-from schemas.history_schemas import PatientDiagnosedConditionsCreate
-from models.history import PatientDiagnosedConditions
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from sqlmodel import Session, func, select
 
@@ -15,6 +9,7 @@ from models.history import (
     MedicalHistory,
     MedicalHistorySnapshot,
     MedicalTreatment,
+    PatientDiagnosedConditions,
     PatientFamilyHistory,
 )
 from schemas.history_schemas import (
@@ -24,6 +19,8 @@ from schemas.history_schemas import (
     MedicalHistoryUpdate,
     MedicalTreatmentCreate,
     MedicalTreatmentUpdate,
+    PatientDiagnosedConditionsCreate,
+    PatientDiagnosedConditionsUpdate,
     PatientFamilyHistoryCreate,
     PatientFamilyHistoryUpdate,
 )

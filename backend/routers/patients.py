@@ -1,11 +1,3 @@
-from schemas.patient_schemas import PersonnelTypeUpdate
-from schemas.patient_schemas import PersonnelTypeCreate
-from services.patient_service import personnel_type_service
-from schemas.patient_schemas import PersonnelTypePublic
-from schemas.patient_schemas import StudentTypeUpdate
-from schemas.patient_schemas import StudentTypeCreate
-from services.patient_service import student_type_service
-from schemas.patient_schemas import StudentTypePublic
 import math
 from typing import List
 
@@ -14,8 +6,22 @@ from sqlmodel import Session
 
 from core.database import get_session
 from schemas.base_schemas import GenericResponse, PaginationMeta
-from schemas.patient_schemas import PatientCreate, PatientPublic, PatientUpdate
-from services.patient_service import patient_service
+from schemas.patient_schemas import (
+    PatientCreate,
+    PatientPublic,
+    PatientUpdate,
+    PersonnelTypeCreate,
+    PersonnelTypePublic,
+    PersonnelTypeUpdate,
+    StudentTypeCreate,
+    StudentTypePublic,
+    StudentTypeUpdate,
+)
+from services.patient_service import (
+    patient_service,
+    personnel_type_service,
+    student_type_service,
+)
 
 router = APIRouter(prefix="/patients", tags=["Patients"])
 

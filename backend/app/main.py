@@ -15,9 +15,9 @@ from routers import (
     medical_examinations,
     medical_history,
     medical_treatments,
-    patients,
-    patient_family_history,
     patient_diagnosed_conditions,
+    patient_family_history,
+    patients,
 )
 
 
