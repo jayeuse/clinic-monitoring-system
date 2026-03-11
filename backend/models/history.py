@@ -70,8 +70,8 @@ class PatientDiagnosedConditions(BaseModel, table=True):
 
     date_diagnosed: Optional[date] = Field(default=None)
 
-class MedicalHistoryUpdate(BaseModel, table=True):
-    mhu_id: str = Field(unique=True, index=True, max_length=20)
+class MedicalExamination(BaseModel, table=True):
+    me_id: str = Field(unique=True, index=True, max_length=20)
 
     patient_uuid: UUID = Field(foreign_key="patientinformation.uuid", index=True, unique=True)
     mh_uuid: UUID = Field(foreign_key="medicalhistory.uuid")
@@ -80,8 +80,8 @@ class MedicalHistoryUpdate(BaseModel, table=True):
 
     date_taken: date = Field(default_factory=date.today)
 
-class MHUSystemFindings(BaseModel, table=True):
-    mhu_uuid: UUID = Field(foreign_key="medicalhistoryupdate.uuid")
+class MedicalExaminationFindings(BaseModel, table=True):
+    me_uuid: UUID = Field(foreign_key="medicalexamination.uuid")
     bsl_uuid: UUID = Field(foreign_key="bodysystemslookup.uuid")
 
     status: BodySystemStatus = Field(default=BodySystemStatus.NOT_ASSESSED)
@@ -115,6 +115,6 @@ class MedicalHistorySnapshot(BaseModel, table=True):
 
 class MedicalExaminationSnapshot(BaseModel, table=True):
     snapshot_id: str = Field(unique=True, index=True, max_length=20)
-    original_mhu_uuid: UUID = Field(foreign_key="medicalhistoryupdate.uuid", index=True)
+    original_me_uuid: UUID = Field(foreign_key="medicalexamination.uuid", index=True)
     snapshot_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     date_taken: date = Field(default_factory=date.today)

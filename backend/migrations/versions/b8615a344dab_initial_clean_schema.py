@@ -1,8 +1,8 @@
-"""initial revision
+"""initial clean schema
 
-Revision ID: eee2569de4a9
+Revision ID: b8615a344dab
 Revises: 
-Create Date: 2026-02-23 17:50:07.513254
+Create Date: 2026-03-11 17:33:36.826990
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'eee2569de4a9'
+revision: str = 'b8615a344dab'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -191,7 +191,7 @@ def upgrade() -> None:
     )
     with op.batch_alter_table('medicalhistory', schema=None) as batch_op:
         batch_op.create_index(batch_op.f('ix_medicalhistory_mh_id'), ['mh_id'], unique=True)
-        batch_op.create_index(batch_op.f('ix_medicalhistory_patient_uuid'), ['patient_uuid'], unique=False)
+        batch_op.create_index(batch_op.f('ix_medicalhistory_patient_uuid'), ['patient_uuid'], unique=True)
         batch_op.create_index(batch_op.f('ix_medicalhistory_uuid'), ['uuid'], unique=False)
 
     op.create_table('personneltype',
@@ -258,15 +258,16 @@ def upgrade() -> None:
     )
     with op.batch_alter_table('dentalrecord', schema=None) as batch_op:
         batch_op.create_index(batch_op.f('ix_dentalrecord_dr_id'), ['dr_id'], unique=True)
+        batch_op.create_index(batch_op.f('ix_dentalrecord_patient_uuid'), ['patient_uuid'], unique=True)
         batch_op.create_index(batch_op.f('ix_dentalrecord_uuid'), ['uuid'], unique=False)
 
-    op.create_table('medicalhistoryupdate',
+    op.create_table('medicalexamination',
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
     sa.Column('deleted_at', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('uuid', sa.Uuid(), nullable=False),
-    sa.Column('mhu_id', sqlmodel.sql.sqltypes.AutoString(length=20), nullable=False),
+    sa.Column('me_id', sqlmodel.sql.sqltypes.AutoString(length=20), nullable=False),
     sa.Column('patient_uuid', sa.Uuid(), nullable=False),
     sa.Column('mh_uuid', sa.Uuid(), nullable=False),
     sa.Column('date_taken', sa.Date(), nullable=False),
@@ -274,9 +275,41 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['patient_uuid'], ['patientinformation.uuid'], ),
     sa.PrimaryKeyConstraint('uuid')
     )
-    with op.batch_alter_table('medicalhistoryupdate', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_medicalhistoryupdate_mhu_id'), ['mhu_id'], unique=True)
-        batch_op.create_index(batch_op.f('ix_medicalhistoryupdate_uuid'), ['uuid'], unique=False)
+    with op.batch_alter_table('medicalexamination', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_medicalexamination_me_id'), ['me_id'], unique=True)
+        batch_op.create_index(batch_op.f('ix_medicalexamination_patient_uuid'), ['patient_uuid'], unique=True)
+        batch_op.create_index(batch_op.f('ix_medicalexamination_uuid'), ['uuid'], unique=False)
+
+    op.create_table('medicalhistorysnapshot',
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('uuid', sa.Uuid(), nullable=False),
+    sa.Column('snapshot_id', sqlmodel.sql.sqltypes.AutoString(length=20), nullable=False),
+    sa.Column('original_mh_uuid', sa.Uuid(), nullable=False),
+    sa.Column('snapshot_date', sa.DateTime(), nullable=False),
+    sa.Column('smoking_status', sa.Enum('NEVER', 'TRIED_ONCE', 'STOPPED_SINCE', 'ACTIVE', name='smokestatus'), nullable=False),
+    sa.Column('smoking_started_since', sa.Date(), nullable=True),
+    sa.Column('drug_status', sa.Enum('NEVER', 'TRIED_ONCE', 'SOMETIMES', 'ACTIVE', name='drugstatus'), nullable=False),
+    sa.Column('drug_name', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.Column('did_rehab', sa.Boolean(), nullable=True),
+    sa.Column('alcohol_status', sa.Enum('NEVER', 'ONCE_A_WEEK', 'MORE_THAN_ONCE_A_WEEK', name='alcoholstatus'), nullable=False),
+    sa.Column('alcohol_est_consumption', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.Column('no_of_pregnancies', sa.Integer(), nullable=True),
+    sa.Column('no_of_miscarriages', sa.Integer(), nullable=True),
+    sa.Column('no_of_term_deliveries', sa.Integer(), nullable=True),
+    sa.Column('no_of_premature_deliveries', sa.Integer(), nullable=True),
+    sa.Column('total_children', sa.Integer(), nullable=True),
+    sa.Column('surgery_notes', sa.TEXT(), nullable=True),
+    sa.Column('maintenance_medications', sa.TEXT(), nullable=True),
+    sa.ForeignKeyConstraint(['original_mh_uuid'], ['medicalhistory.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    with op.batch_alter_table('medicalhistorysnapshot', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_medicalhistorysnapshot_original_mh_uuid'), ['original_mh_uuid'], unique=False)
+        batch_op.create_index(batch_op.f('ix_medicalhistorysnapshot_snapshot_id'), ['snapshot_id'], unique=True)
+        batch_op.create_index(batch_op.f('ix_medicalhistorysnapshot_uuid'), ['uuid'], unique=False)
 
     op.create_table('patientdiagnosedconditions',
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
@@ -334,6 +367,32 @@ def upgrade() -> None:
         batch_op.create_index(batch_op.f('ix_vitalsigns_uuid'), ['uuid'], unique=False)
         batch_op.create_index(batch_op.f('ix_vitalsigns_vs_id'), ['vs_id'], unique=True)
 
+    op.create_table('dentalrecordsnapshot',
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('uuid', sa.Uuid(), nullable=False),
+    sa.Column('snapshot_id', sqlmodel.sql.sqltypes.AutoString(length=20), nullable=False),
+    sa.Column('original_dr_uuid', sa.Uuid(), nullable=False),
+    sa.Column('snapshot_date', sa.DateTime(), nullable=False),
+    sa.Column('last_dental_visit', sa.Date(), nullable=True),
+    sa.Column('reason_for_last_dental_visit', sa.TEXT(), nullable=True),
+    sa.Column('last_hospitalization', sa.Date(), nullable=True),
+    sa.Column('hospitalization_reason', sa.TEXT(), nullable=True),
+    sa.Column('known_allergies', sa.TEXT(), nullable=True),
+    sa.Column('tobacco_use', sa.TEXT(), nullable=True),
+    sa.Column('alcohol_drug_use', sa.TEXT(), nullable=True),
+    sa.Column('for_women_status', sa.TEXT(), nullable=True),
+    sa.Column('chart_image_url', sqlmodel.sql.sqltypes.AutoString(length=500), nullable=True),
+    sa.ForeignKeyConstraint(['original_dr_uuid'], ['dentalrecord.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    with op.batch_alter_table('dentalrecordsnapshot', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_dentalrecordsnapshot_original_dr_uuid'), ['original_dr_uuid'], unique=False)
+        batch_op.create_index(batch_op.f('ix_dentalrecordsnapshot_snapshot_id'), ['snapshot_id'], unique=True)
+        batch_op.create_index(batch_op.f('ix_dentalrecordsnapshot_uuid'), ['uuid'], unique=False)
+
     op.create_table('dentalrecordupdate',
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
     sa.Column('deleted_at', sa.DateTime(), nullable=True),
@@ -357,6 +416,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     with op.batch_alter_table('dentalrecordupdate', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_dentalrecordupdate_dr_uuid'), ['dr_uuid'], unique=True)
         batch_op.create_index(batch_op.f('ix_dentalrecordupdate_dru_id'), ['dru_id'], unique=True)
         batch_op.create_index(batch_op.f('ix_dentalrecordupdate_uuid'), ['uuid'], unique=False)
 
@@ -385,22 +445,68 @@ def upgrade() -> None:
         batch_op.create_index(batch_op.f('ix_dentalservicerendered_dsr_id'), ['dsr_id'], unique=True)
         batch_op.create_index(batch_op.f('ix_dentalservicerendered_uuid'), ['uuid'], unique=False)
 
-    op.create_table('mhusystemfindings',
+    op.create_table('medicalexaminationfindings',
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
     sa.Column('deleted_at', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('uuid', sa.Uuid(), nullable=False),
-    sa.Column('mhu_uuid', sa.Uuid(), nullable=False),
+    sa.Column('me_uuid', sa.Uuid(), nullable=False),
     sa.Column('bsl_uuid', sa.Uuid(), nullable=False),
     sa.Column('status', sa.Enum('NORMAL', 'ABNORMAL', 'NOT_ASSESSED', name='bodysystemstatus'), nullable=False),
     sa.Column('condition_notes', sa.TEXT(), nullable=True),
     sa.ForeignKeyConstraint(['bsl_uuid'], ['bodysystemslookup.uuid'], ),
-    sa.ForeignKeyConstraint(['mhu_uuid'], ['medicalhistoryupdate.uuid'], ),
+    sa.ForeignKeyConstraint(['me_uuid'], ['medicalexamination.uuid'], ),
     sa.PrimaryKeyConstraint('uuid')
     )
-    with op.batch_alter_table('mhusystemfindings', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_mhusystemfindings_uuid'), ['uuid'], unique=False)
+    with op.batch_alter_table('medicalexaminationfindings', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_medicalexaminationfindings_uuid'), ['uuid'], unique=False)
+
+    op.create_table('medicalexaminationsnapshot',
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('uuid', sa.Uuid(), nullable=False),
+    sa.Column('snapshot_id', sqlmodel.sql.sqltypes.AutoString(length=20), nullable=False),
+    sa.Column('original_me_uuid', sa.Uuid(), nullable=False),
+    sa.Column('snapshot_date', sa.DateTime(), nullable=False),
+    sa.Column('date_taken', sa.Date(), nullable=False),
+    sa.ForeignKeyConstraint(['original_me_uuid'], ['medicalexamination.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    with op.batch_alter_table('medicalexaminationsnapshot', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_medicalexaminationsnapshot_original_me_uuid'), ['original_me_uuid'], unique=False)
+        batch_op.create_index(batch_op.f('ix_medicalexaminationsnapshot_snapshot_id'), ['snapshot_id'], unique=True)
+        batch_op.create_index(batch_op.f('ix_medicalexaminationsnapshot_uuid'), ['uuid'], unique=False)
+
+    op.create_table('dentalexaminationsnapshot',
+    sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('uuid', sa.Uuid(), nullable=False),
+    sa.Column('snapshot_id', sqlmodel.sql.sqltypes.AutoString(length=20), nullable=False),
+    sa.Column('original_dr_uuid', sa.Uuid(), nullable=False),
+    sa.Column('snapshot_date', sa.DateTime(), nullable=False),
+    sa.Column('examination_date', sa.Date(), nullable=False),
+    sa.Column('head_findings', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
+    sa.Column('face_findings', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
+    sa.Column('tmj_findings', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
+    sa.Column('periodontal_diagnosis', sa.Enum('HEALTHY', 'GINGIVITIS_LOCALIZED', 'GINGIVITIS_GENERALIZED', 'PERIODONTITIS_LOCALIZED', 'PERIODONTITIS_GENERALIZED', 'OTHERS', name='periodontaldiagnosis'), nullable=True),
+    sa.Column('periodontitis_severity', sa.Enum('SLIGHT', 'MODERATE', 'SEVERE', name='severitytype'), nullable=True),
+    sa.Column('periodontal_others', sa.TEXT(), nullable=True),
+    sa.Column('lips_findings', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
+    sa.Column('palate_findings', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
+    sa.Column('floor_of_mouth_findings', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
+    sa.Column('tongue_findings', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
+    sa.ForeignKeyConstraint(['original_dr_uuid'], ['dentalrecordupdate.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    with op.batch_alter_table('dentalexaminationsnapshot', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_dentalexaminationsnapshot_original_dr_uuid'), ['original_dr_uuid'], unique=False)
+        batch_op.create_index(batch_op.f('ix_dentalexaminationsnapshot_snapshot_id'), ['snapshot_id'], unique=True)
+        batch_op.create_index(batch_op.f('ix_dentalexaminationsnapshot_uuid'), ['uuid'], unique=False)
 
     op.create_table('toothfinding',
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
@@ -430,10 +536,22 @@ def downgrade() -> None:
         batch_op.drop_index(batch_op.f('ix_toothfinding_tf_id'))
 
     op.drop_table('toothfinding')
-    with op.batch_alter_table('mhusystemfindings', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('ix_mhusystemfindings_uuid'))
+    with op.batch_alter_table('dentalexaminationsnapshot', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_dentalexaminationsnapshot_uuid'))
+        batch_op.drop_index(batch_op.f('ix_dentalexaminationsnapshot_snapshot_id'))
+        batch_op.drop_index(batch_op.f('ix_dentalexaminationsnapshot_original_dr_uuid'))
 
-    op.drop_table('mhusystemfindings')
+    op.drop_table('dentalexaminationsnapshot')
+    with op.batch_alter_table('medicalexaminationsnapshot', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_medicalexaminationsnapshot_uuid'))
+        batch_op.drop_index(batch_op.f('ix_medicalexaminationsnapshot_snapshot_id'))
+        batch_op.drop_index(batch_op.f('ix_medicalexaminationsnapshot_original_me_uuid'))
+
+    op.drop_table('medicalexaminationsnapshot')
+    with op.batch_alter_table('medicalexaminationfindings', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_medicalexaminationfindings_uuid'))
+
+    op.drop_table('medicalexaminationfindings')
     with op.batch_alter_table('dentalservicerendered', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_dentalservicerendered_uuid'))
         batch_op.drop_index(batch_op.f('ix_dentalservicerendered_dsr_id'))
@@ -442,8 +560,15 @@ def downgrade() -> None:
     with op.batch_alter_table('dentalrecordupdate', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_dentalrecordupdate_uuid'))
         batch_op.drop_index(batch_op.f('ix_dentalrecordupdate_dru_id'))
+        batch_op.drop_index(batch_op.f('ix_dentalrecordupdate_dr_uuid'))
 
     op.drop_table('dentalrecordupdate')
+    with op.batch_alter_table('dentalrecordsnapshot', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_dentalrecordsnapshot_uuid'))
+        batch_op.drop_index(batch_op.f('ix_dentalrecordsnapshot_snapshot_id'))
+        batch_op.drop_index(batch_op.f('ix_dentalrecordsnapshot_original_dr_uuid'))
+
+    op.drop_table('dentalrecordsnapshot')
     with op.batch_alter_table('vitalsigns', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_vitalsigns_vs_id'))
         batch_op.drop_index(batch_op.f('ix_vitalsigns_uuid'))
@@ -458,13 +583,21 @@ def downgrade() -> None:
         batch_op.drop_index(batch_op.f('ix_patientdiagnosedconditions_uuid'))
 
     op.drop_table('patientdiagnosedconditions')
-    with op.batch_alter_table('medicalhistoryupdate', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('ix_medicalhistoryupdate_uuid'))
-        batch_op.drop_index(batch_op.f('ix_medicalhistoryupdate_mhu_id'))
+    with op.batch_alter_table('medicalhistorysnapshot', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_medicalhistorysnapshot_uuid'))
+        batch_op.drop_index(batch_op.f('ix_medicalhistorysnapshot_snapshot_id'))
+        batch_op.drop_index(batch_op.f('ix_medicalhistorysnapshot_original_mh_uuid'))
 
-    op.drop_table('medicalhistoryupdate')
+    op.drop_table('medicalhistorysnapshot')
+    with op.batch_alter_table('medicalexamination', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_medicalexamination_uuid'))
+        batch_op.drop_index(batch_op.f('ix_medicalexamination_patient_uuid'))
+        batch_op.drop_index(batch_op.f('ix_medicalexamination_me_id'))
+
+    op.drop_table('medicalexamination')
     with op.batch_alter_table('dentalrecord', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_dentalrecord_uuid'))
+        batch_op.drop_index(batch_op.f('ix_dentalrecord_patient_uuid'))
         batch_op.drop_index(batch_op.f('ix_dentalrecord_dr_id'))
 
     op.drop_table('dentalrecord')

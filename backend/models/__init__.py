@@ -4,5 +4,5 @@ from models.users import User
 from models.patients import PatientInformation, StudentType, PersonnelType
 from models.lookups import DepartmentsLookup, MedicalConditionsLookup, SmokingTypesLookup, BodySystemsLookup
 from models.clinic import ClinicTransaction, VitalSigns
-from models.history import MedicalHistory, PatientSmokingTypes, PatientDiagnosedConditions, MedicalHistoryUpdate, MHUSystemFindings
+from models.history import MedicalHistory, PatientSmokingTypes, PatientDiagnosedConditions, MedicalExamination, MedicalExaminationFindings
 from models.dental import DentalRecord, DentalExamination, ToothFinding, DentalServiceRendered
