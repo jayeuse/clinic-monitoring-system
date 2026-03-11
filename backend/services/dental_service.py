@@ -192,6 +192,17 @@ class DentalExaminationService(BaseService[DentalExamination]):
         db.commit()
         return updated_exam
 
+    def get_by_patient_id(self, db: Session, patient_id: str) -> List[DentalExamination]:
+        dr_service = DentalRecordService()
+        dr = dr_service.get_by_patient_id(db, patient_id=patient_id)
+        if not dr:
+            return []
+            
+        statement = select(self.model).where(
+            self.model.dr_uuid == dr.uuid, self.model.is_deleted.is_(False)
+        )
+        return db.exec(statement).all()
+    
     def get_by_dru_id(self, db: Session, dru_id: str) -> Optional[DentalExamination]:
         statement = select(self.model).where(self.model.dru_id == dru_id, self.model.is_deleted.is_(False))
         return db.exec(statement).first()
@@ -222,6 +233,18 @@ class DentalTreatmentService(BaseService[DentalServiceRendered]):
 
         return super().create(db, obj_in=db_obj)
 
+    def get_by_patient_id(self, db: Session, patient_id: str) -> List[DentalServiceRendered]:
+        dr_service = DentalRecordService()
+        dr = dr_service.get_by_patient_id(db, patient_id=patient_id)
+        if not dr:
+            return []
+            
+        statement = select(self.model).where(
+            self.model.dr_uuid == dr.uuid, self.model.is_deleted.is_(False)
+        )
+        return db.exec(statement).all()
+
+    
     def get_by_dsr_id(self, db: Session, dsr_id: str) -> Optional[DentalServiceRendered]:
         statement = select(self.model).where(self.model.dsr_id == dsr_id, self.model.is_deleted.is_(False))
         return db.exec(statement).first()

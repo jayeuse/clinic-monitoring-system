@@ -29,6 +29,12 @@ def record_dental_examination(exam_in: DentalExaminationCreate, db: Session = De
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+@router.get("/patient/{patient_id}", response_model=GenericResponse[List[DentalExaminationPublic]])
+def read_patient_examinations(patient_id: str, db: Session = Depends(get_session)):
+    examinations = examination_service.get_by_patient_id(db, patient_id=patient_id)
+    return GenericResponse(message="Patient's Dental Examinations retrieved successfully", data=examinations)
+
+
 @router.patch("/{dru_id}", response_model=GenericResponse[DentalExaminationPublic])
 def update_dental_examination(dru_id: str, obj_in: DentalExaminationUpdate, db: Session = Depends(get_session)):
     db_obj = examination_service.get_by_dru_id(db, dru_id=dru_id)
@@ -67,6 +73,12 @@ def record_dental_treatment(treatment_in: DentalTreatmentCreate, db: Session = D
         return GenericResponse(message="Dental Treatment recorded successfully", data=new_treatment)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/treatments/patient/{patient_id}", response_model=GenericResponse[List[DentalTreatmentPublic]])
+def read_patient_treatments(patient_id: str, db: Session = Depends(get_session)):
+    treatments = treatment_service.get_by_patient_id(db, patient_id=patient_id)
+    return GenericResponse(message="Patient's Dental Treatments retrieved successfully", data=treatments)
+
 
 @router.patch("/treatments/{dsr_id}", response_model=GenericResponse[DentalTreatmentPublic])
 def update_dental_treatment(dsr_id: str, obj_in: DentalTreatmentUpdate, db: Session = Depends(get_session)):
