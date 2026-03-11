@@ -49,8 +49,11 @@ def create_patient(
     patient_in: PatientCreate,
     db: Session = Depends(get_session)
 ):
-    new_patient = patient_service.create(db, obj_in=patient_in)
-    return GenericResponse(message="Patient record created successfully", data=new_patient)
+    try:
+        new_patient = patient_service.create(db, obj_in=patient_in)
+        return GenericResponse(message="Patient record created successfully", data=new_patient)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.patch("/{patient_id}", response_model=GenericResponse[PatientPublic])
 def update_patient(

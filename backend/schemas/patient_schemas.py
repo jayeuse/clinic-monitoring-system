@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, Field, computed_field
 
 from models.patients import PatientType, SexType
 
@@ -84,3 +84,44 @@ class PatientPublic(BaseModel):
     def age(self) -> int:
         today = date.today()
         return today.year - self.birthdate.year - ((today.month, today.day) < (self.birthdate.month, self.birthdate.day))
+
+class EmergencyContactCreate(BaseModel):
+    patient_id: str
+    last_name: str
+    first_name: str
+    middle_name: Optional[str] = None
+    relation_to_patient: str
+    house_no: Optional[str] = None
+    street: Optional[str] = None
+    subdivision: Optional[str] = None
+    barangay: Optional[str] = None
+    city: Optional[str] = None
+    province: Optional[str] = None
+    zip_code: Optional[str] = None
+
+class EmergencyContactUpdate(BaseModel):
+    last_name: Optional[str] = None
+    first_name: Optional[str] = None
+    middle_name: Optional[str] = None
+    relation_to_patient: Optional[str] = None
+    house_no: Optional[str] = None
+    street: Optional[str] = None
+    subdivision: Optional[str] = None
+    barangay: Optional[str] = None
+    city: Optional[str] = None
+    province: Optional[str] = None
+    zip_code: Optional[str] = None
+
+class EmergencyContactPublic(BaseModel):
+    ec_id: str
+    last_name: str
+    first_name: str
+    middle_name: Optional[str] = None
+    relation_to_patient: str
+    house_no: Optional[str] = None
+    street: Optional[str] = None
+    subdivision: Optional[str] = None
+    barangay: Optional[str] = None
+    city: Optional[str] = None
+    province: Optional[str] = None
+    zip_code: Optional[str] = None

@@ -47,6 +47,8 @@ class PatientInformation(BaseModel, table=True):
 
     medical_history: Optional["MedicalHistory"] = Relationship(back_populates="patient")
 
+    emergency_contacts: list["EmergencyContact"] = Relationship(back_populates="patient")
+
 class StudentType(BaseModel, table=True):
     patient_uuid: UUID = Field(foreign_key="patientinformation.uuid", unique=True)
     
@@ -66,3 +68,23 @@ class PersonnelType(BaseModel, table=True):
     dl_uuid: Optional[UUID] = Field(default=None, foreign_key="departmentslookup.uuid")
 
     teaching: bool = Field(default=False)
+
+class EmergencyContact(BaseModel, table=True):
+    ec_id: str = Field(unique=True, index=True, max_length=20)
+
+    patient_uuid: UUID = Field(foreign_key="patientinformation.uuid", unique=True)
+    patient: "PatientInformation" = Relationship(back_populates="emergency_contacts")
+
+    last_name: str = Field(max_length=100)
+    first_name: str = Field(max_length=100)
+    middle_name: Optional[str] = Field(default=None, max_length=100)
+
+    relation_to_patient: str = Field(max_length=100)
+
+    house_no: Optional[str] = Field(default=None, max_length=20)
+    street: Optional[str] = Field(default=None, max_length=100)
+    subdivision: Optional[str] = Field(default=None, max_length=100)
+    barangay: Optional[str] = Field(default=None, max_length=100)
+    city: Optional[str] = Field(default=None, max_length=100)
+    province: Optional[str] = Field(default=None, max_length=100)
+    zip_code: Optional[str] = Field(default=None, max_length=10)

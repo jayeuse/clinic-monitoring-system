@@ -25,5 +25,10 @@ from models.lookups import (
     MedicalConditionsLookup,
     SmokingTypesLookup,
 )
-from models.patients import PatientInformation, PersonnelType, StudentType
+from models.patients import (
+    EmergencyContact,
+    PatientInformation,
+    PersonnelType,
+    StudentType,
+)
 from models.users import User

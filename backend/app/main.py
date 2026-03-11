@@ -10,6 +10,7 @@ from routers import (
     dental_examinations,
     dental_records,
     dental_treatments,
+    emergency_contacts,
     medical_examinations,
     medical_history,
     medical_treatments,
@@ -40,6 +41,7 @@ app.add_middleware(
 )
 
 app.include_router(patients.router)
+app.include_router(emergency_contacts.router)
 app.include_router(clinic.router)
 app.include_router(medical_history.router)
 app.include_router(medical_examinations.router)
