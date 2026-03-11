@@ -6,13 +6,11 @@ from models.lookups import (
     BodySystemsLookup,
     DepartmentsLookup,
     MedicalConditionsLookup,
-    SmokingTypesLookup,
 )
 from schemas.lookup_schemas import (
     BodySystemsLookupCreate,
     DepartmentsLookupCreate,
     MedicalConditionsLookupCreate,
-    SmokingTypesLookupCreate,
 )
 from services.base import BaseService
 
@@ -65,27 +63,6 @@ class MedicalConditionsLookupService(BaseService[MedicalConditionsLookup]):
         return db_obj
 
 
-class SmokingTypesLookupService(BaseService[SmokingTypesLookup]):
-    def __init__(self):
-        super().__init__(SmokingTypesLookup)
-
-    def get_by_stl_id(self, db: Session, stl_id: str) -> Optional[SmokingTypesLookup]:
-        statement = select(self.model).where(
-            self.model.stl_id == stl_id, self.model.is_deleted.is_(False)
-        )
-        return db.exec(statement).first()
-
-    def create(self, db: Session, *, obj_in: SmokingTypesLookupCreate) -> SmokingTypesLookup:
-        statement = select(func.count()).select_from(self.model)
-        count = db.exec(statement).one()
-        new_id = f"STL-{count + 1:06d}"
-
-        db_obj = SmokingTypesLookup(**obj_in.model_dump(), stl_id=new_id)
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
-        return db_obj
-
 
 class BodySystemsLookupService(BaseService[BodySystemsLookup]):
     def __init__(self):
@@ -113,5 +90,4 @@ class BodySystemsLookupService(BaseService[BodySystemsLookup]):
 
 departments_lookup_service = DepartmentsLookupService()
 medical_conditions_lookup_service = MedicalConditionsLookupService()
-smoking_types_lookup_service = SmokingTypesLookupService()
 body_systems_lookup_service = BodySystemsLookupService()

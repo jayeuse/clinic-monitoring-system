@@ -18,13 +18,11 @@ from models.history import (
     MedicalTreatment,
     PatientDiagnosedConditions,
     PatientFamilyHistory,
-    PatientSmokingTypes,
 )
 from models.lookups import (
     BodySystemsLookup,
     DepartmentsLookup,
     MedicalConditionsLookup,
-    SmokingTypesLookup,
 )
 from models.patients import (
     EmergencyContact,

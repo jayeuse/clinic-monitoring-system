@@ -22,12 +22,6 @@ class MedicalConditionsLookup(BaseModel, table=True):
 
     is_active: bool = Field(default=True)
 
-class SmokingTypesLookup(BaseModel, table=True):
-    stl_id: str = Field(unique=True, index=True, max_length=20)
-    type_name: str = Field(unique=True, max_length=150)
-
-    is_active: bool = Field(default=True)
-    
 class BodySystemsLookup(BaseModel, table=True):
     bsl_id: str = Field(unique=True, index=True, max_length=20)
     system_name: str = Field(unique=True, max_length=150)

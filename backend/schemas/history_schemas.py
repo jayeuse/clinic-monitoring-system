@@ -13,6 +13,9 @@ class MedicalHistoryCreate(BaseModel):
     smoking_status: SmokeStatus = SmokeStatus.NEVER
     smoking_started_since: Optional[date] = None
 
+    smoking_type: Optional[str] = None
+    smoking_frequency: Optional[str] = None
+
     drug_status: DrugStatus = DrugStatus.NEVER
     drug_name: Optional[str] = None
     did_rehab: Optional[bool] = None
@@ -32,6 +35,9 @@ class MedicalHistoryCreate(BaseModel):
 class MedicalHistoryUpdate(BaseModel):
     smoking_status: Optional[SmokeStatus] = None
     smoking_started_since: Optional[date] = None
+
+    smoking_type: Optional[str] = None
+    smoking_frequency: Optional[str] = None
 
     drug_status: Optional[DrugStatus] = None
     drug_name: Optional[str] = None
@@ -59,6 +65,8 @@ class MedicalHistoryPublic(BaseModel):
 
     smoking_status: SmokeStatus
     smoking_started_since: Optional[date]
+    smoking_type: Optional[str]
+    smoking_frequency: Optional[str]
     drug_status: DrugStatus
     drug_name: Optional[str]
     did_rehab: Optional[bool]

@@ -9,7 +9,6 @@ sys.path.insert(0, dirname(dirname(abspath(__file__))))
 
 from sqlmodel import SQLModel
 
-import models
 from core.config import settings
 
 # this is the Alembic Config object, which provides

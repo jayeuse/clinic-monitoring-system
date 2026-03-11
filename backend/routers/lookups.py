@@ -16,15 +16,11 @@ from schemas.lookup_schemas import (
     MedicalConditionsLookupCreate,
     MedicalConditionsLookupPublic,
     MedicalConditionsLookupUpdate,
-    SmokingTypesLookupCreate,
-    SmokingTypesLookupPublic,
-    SmokingTypesLookupUpdate,
 )
 from services.lookup_service import (
     body_systems_lookup_service,
     departments_lookup_service,
     medical_conditions_lookup_service,
-    smoking_types_lookup_service,
 )
 
 router = APIRouter(prefix="/lookups", tags=["Lookups"])
@@ -189,86 +185,6 @@ def restore_medical_condition_lookup(
         raise HTTPException(status_code=400, detail="Medical condition lookup is not deleted")
     restored_condition = medical_conditions_lookup_service.restore(db, uuid=db_obj.uuid)
     return GenericResponse(message="Medical condition lookup restored successfully", data=restored_condition)
-
-# --- Smoking Types Lookup Endpoints ---
-
-@router.get("/smoking-types", response_model=GenericResponse[List[SmokingTypesLookupPublic]])
-def read_smoking_types(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_session)
-):
-    types, total_count = smoking_types_lookup_service.get_all(db, skip=skip, limit=limit)
-
-    current_page = (skip // limit) + 1
-    total_pages = math.ceil(total_count / limit) if limit > 0 else 1
-
-    meta = PaginationMeta(
-        total_records=total_count,
-        current_page=current_page,
-        total_pages=total_pages,
-        next_page=(current_page + 1) if (skip + limit) < total_count else None,
-        prev_page=(current_page - 1) if skip > 0 else None
-    )
-
-    return GenericResponse(message="Smoking Types retrieved successfully", data=types, meta=meta)
-
-@router.post("/smoking-types", response_model=GenericResponse[SmokingTypesLookupPublic])
-def create_smoking_type(
-    type_in: SmokingTypesLookupCreate,
-    db: Session = Depends(get_session)
-):
-    new_type = smoking_types_lookup_service.create(db, obj_in=type_in)
-    return GenericResponse(message="Smoking Type created successfully", data=new_type)
-
-@router.get("/smoking-types/{stl_id}", response_model=GenericResponse[SmokingTypesLookupPublic])
-def read_smoking_type_by_id(
-    stl_id: str,
-    db: Session = Depends(get_session)
-):
-    smoking_type = smoking_types_lookup_service.get_by_stl_id(db, stl_id=stl_id)
-    if not smoking_type:
-        raise HTTPException(status_code=404, detail="Smoking Type not found")
-    return GenericResponse(message="Smoking Type retrieved successfully", data=smoking_type)
-
-@router.patch("/smoking-types/{stl_id}", response_model=GenericResponse[SmokingTypesLookupPublic])
-def update_smoking_type(
-    stl_id: str,
-    type_in: SmokingTypesLookupUpdate,
-    db: Session = Depends(get_session)
-):
-    db_obj = smoking_types_lookup_service.get_by_stl_id(db, stl_id=stl_id)
-    if not db_obj:
-        raise HTTPException(status_code=404, detail="Smoking Type not found")
-    
-    updated_type = smoking_types_lookup_service.update(db, db_obj=db_obj, obj_in=type_in)
-    return GenericResponse(message="Smoking Type updated successfully", data=updated_type)
-
-@router.delete("/smoking-types/{stl_id}", response_model=GenericResponse[SmokingTypesLookupPublic])
-def delete_smoking_type(
-    stl_id: str,
-    db: Session = Depends(get_session)
-):
-    db_obj = smoking_types_lookup_service.get_by_stl_id(db, stl_id=stl_id)
-    if not db_obj:
-        raise HTTPException(status_code=404, detail="Smoking Type not found")
-    
-    deleted_type = smoking_types_lookup_service.remove(db, uuid=db_obj.uuid)
-    return GenericResponse(message="Smoking Type deleted successfully", data=deleted_type)
-
-@router.post("/smoking-types/{stl_id}/restore", response_model=GenericResponse[SmokingTypesLookupPublic])
-def restore_smoking_type_lookup(
-    stl_id: str,
-    db: Session = Depends(get_session)
-):
-    db_obj = smoking_types_lookup_service.get_by_stl_id(db, stl_id=stl_id, include_deleted=True)
-    if not db_obj:
-        raise HTTPException(status_code=404, detail="Smoking type lookup not found")
-        
-    if not db_obj.is_deleted:
-        raise HTTPException(status_code=400, detail="Smoking type lookup is not deleted")
-    restored_smoking = smoking_types_lookup_service.restore(db, uuid=db_obj.uuid)
-    return GenericResponse(message="Smoking type lookup restored successfully", data=restored_smoking)
 
 # --- Body Systems Lookup Endpoints ---
 

@@ -42,6 +42,9 @@ class MedicalHistory(BaseModel, table=True):
 
     smoking_status: SmokeStatus = Field(default=SmokeStatus.NEVER)
     smoking_started_since: Optional[date] = Field(default=None)
+    
+    smoking_type: Optional[str] = Field(default=None)
+    smoking_frequency: Optional[str] = Field(default=None)
 
     drug_status: DrugStatus = Field(default=DrugStatus.NEVER)
     drug_name: Optional[str] = Field(default=None)
@@ -58,11 +61,6 @@ class MedicalHistory(BaseModel, table=True):
 
     surgery_notes: Optional[str] = Field(default=None, sa_type=TEXT)
     maintenance_medications: Optional[str] = Field(default=None, sa_type=TEXT)
-
-class PatientSmokingTypes(BaseModel, table=True):
-    mh_uuid: UUID = Field(foreign_key="medicalhistory.uuid")
-    stl_uuid: UUID = Field(foreign_key="smokingtypeslookup.uuid")
-    frequency: Optional[int] = Field(default=None)
 
 class PatientDiagnosedConditions(BaseModel, table=True):
     mh_uuid: UUID = Field(foreign_key="medicalhistory.uuid")
@@ -95,6 +93,9 @@ class MedicalHistorySnapshot(BaseModel, table=True):
 
     smoking_status: SmokeStatus = Field(default=SmokeStatus.NEVER)
     smoking_started_since: Optional[date] = Field(default=None)
+
+    smoking_type: Optional[str] = Field(default=None)
+    smoking_frequency: Optional[str] = Field(default=None)
 
     drug_status: DrugStatus = Field(default=DrugStatus.NEVER)
     drug_name: Optional[str] = Field(default=None)
