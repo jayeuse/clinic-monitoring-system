@@ -1,3 +1,7 @@
+from schemas.dental_schemas import DentalExaminationUpdate
+from models.dental import DentalExaminationSnapshot
+from schemas.dental_schemas import DentalRecordUpdate
+from models.dental import DentalRecordSnapshot
 from schemas.dental_schemas import DentalRecordCreate
 from typing import List
 from models.history import MedicalHistory
@@ -23,7 +27,7 @@ class DentalRecordService(BaseService[DentalRecord]):
 
         return db.exec(select(self.model).where(self.model.patient_uuid == patient.uuid)).first()
 
-    def create_record(self, db: Session, *, obj_in: DentalRecordCreate) -> DentalRecord:
+    def create(self, db: Session, *, obj_in: DentalRecordCreate) -> DentalRecord:
         patient = patient_service.get_by_patient_id(db, patient_id=obj_in.patient_id)
         if not patient:
             raise ValueError(f"Patient {obj_in.patient_id} not found")
@@ -46,13 +50,64 @@ class DentalRecordService(BaseService[DentalRecord]):
             mh_uuid=mh.uuid
         )
 
-        return super().create(db, obj_in=db_obj)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+
+        statement_snap = select(func.count()).select_from(DentalRecordSnapshot)
+        snap_count = db.exec(statement_snap).one()
+        snap_id = f"DRS-{snap_count + 1:06d}"
+
+        snapshot = DentalRecordSnapshot(
+            snapshot_id=snap_id,
+            original_dr_uuid=db_obj.uuid,
+            last_dental_visit=db_obj.last_dental_visit,
+            reason_for_last_dental_visit=db_obj.reason_for_last_dental_visit,
+            last_hospitalization=db_obj.last_hospitalization,
+            hospitalization_reason=db_obj.hospitalization_reason,
+            known_allergies=db_obj.known_allergies,
+            tobacco_use=db_obj.tobacco_use,
+            alcohol_drug_use=db_obj.alcohol_drug_use,
+            for_women_status=db_obj.for_women_status,
+            chart_image_url=db_obj.chart_image_url
+        )
+
+        db.add(snapshot)
+        db.commit()
+
+        return db_obj
+
+    def update(self,db: Session, *, db_obj: DentalRecord, obj_in: DentalRecordUpdate) -> DentalRecord:
+        updated_dr = super().update(db, db_obj=db_obj, obj_in=obj_in)
+
+        statement_snap = select(func.count()).select_from(DentalRecordSnapshot)
+        snap_count = db.exec(statement_snap).one()
+        snap_id = f"DRS-{snap_count + 1:06d}"
+
+        snapshot = DentalRecordSnapshot(
+            snapshot_id=snap_id,
+            original_dr_uuid=db_obj.uuid,
+            last_dental_visit=db_obj.last_dental_visit,
+            reason_for_last_dental_visit=db_obj.reason_for_last_dental_visit,
+            last_hospitalization=db_obj.last_hospitalization,
+            hospitalization_reason=db_obj.hospitalization_reason,
+            known_allergies=db_obj.known_allergies,
+            tobacco_use=db_obj.tobacco_use,
+            alcohol_drug_use=db_obj.alcohol_drug_use,
+            for_women_status=db_obj.for_women_status,
+            chart_image_url=db_obj.chart_image_url
+        )
+
+        db.add(snapshot)
+        db.commit()
+
+        return updated_dr
 
 class DentalExaminationService(BaseService[DentalExamination]):
     def __init__(self):
         super().__init__(DentalExamination)
 
-    def record_exam(self, db: Session, *, obj_in: DentalExaminationCreate) -> DentalExamination:
+    def create(self, db: Session, *, obj_in: DentalExaminationCreate) -> DentalExamination:
         dr_service = DentalRecordService()
 
         dr = dr_service.get_by_patient_id(db, patient_id=obj_in.patient_id)
@@ -86,7 +141,56 @@ class DentalExaminationService(BaseService[DentalExamination]):
                 db.add(tf_obj)
                 db.commit()
 
+        statement_snap = select(func.count()).select_from(DentalExaminationSnapshot)
+        snap_count = db.exec(statement_snap).one()
+        snap_id = f"DXS-{snap_count + 1:06d}"
+
+        snapshot = DentalExaminationSnapshot(
+            snapshot_id=snap_id,
+            original_dr_uuid=db_obj.uuid, 
+            examination_date=db_obj.examination_date,
+            head_findings=db_obj.head_findings,
+            face_findings=db_obj.face_findings,
+            tmj_findings=db_obj.tmj_findings,
+            periodontal_diagnosis=db_obj.periodontal_diagnosis,
+            periodontitis_severity=db_obj.periodontitis_severity,
+            periodontal_others=db_obj.periodontal_others,
+            lips_findings=db_obj.lips_findings,
+            palate_findings=db_obj.palate_findings,
+            floor_of_mouth_findings=db_obj.floor_of_mouth_findings,
+            tongue_findings=db_obj.tongue_findings
+        )
+
+        db.add(snapshot)
+        db.commit()
+
         return db_obj
+
+    def update(self, db: Session, *, db_obj: DentalExamination, obj_in: DentalExaminationUpdate) -> DentalExamination:
+        updated_exam = super().update(db, db_obj=db_obj, obj_in=obj_in)
+
+        statement_snap = select(func.count()).select_from(DentalExaminationSnapshot)
+        snap_count = db.exec(statement_snap).one()
+        snap_id = f"DXS-{snap_count + 1:06d}"
+        snapshot = DentalExaminationSnapshot(
+            snapshot_id=snap_id,
+            original_dr_uuid=updated_exam.uuid, 
+            examination_date=updated_exam.examination_date,
+            head_findings=updated_exam.head_findings,
+            face_findings=updated_exam.face_findings,
+            tmj_findings=updated_exam.tmj_findings,
+            periodontal_diagnosis=updated_exam.periodontal_diagnosis,
+            periodontitis_severity=updated_exam.periodontitis_severity,
+            periodontal_others=updated_exam.periodontal_others,
+            lips_findings=updated_exam.lips_findings,
+            palate_findings=updated_exam.palate_findings,
+            floor_of_mouth_findings=updated_exam.floor_of_mouth_findings,
+            tongue_findings=updated_exam.tongue_findings
+        )
+        
+        db.add(snapshot)
+        db.commit()
+        return updated_exam
 
     def get_by_dru_id(self, db: Session, dru_id: str) -> Optional[DentalExamination]:
         statement = select(self.model).where(self.model.dru_id == dru_id, self.model.is_deleted.is_(False))

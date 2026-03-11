@@ -19,7 +19,7 @@ def read_dental_record(patient_id: str, db: Session = Depends(get_session)):
 @router.post("/", response_model=GenericResponse[DentalRecordPublic])
 def record_dental_record(obj_in: DentalRecordCreate, db: Session = Depends(get_session)):
     try:
-        new_record = dental_record_service.create_record(db, obj_in=obj_in)
+        new_record = dental_record_service.create(db, obj_in=obj_in)
         return GenericResponse(message="Dental Record created successfully", data=new_record)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

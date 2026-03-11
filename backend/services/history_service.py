@@ -1,3 +1,6 @@
+from schemas.history_schemas import MedicalExaminationUpdate
+from models.history import MedicalHistorySnapshot
+from schemas.history_schemas import MedicalHistoryUpdate
 from models.history import MedicalExaminationSnapshot
 from models.history import MedicalExaminationFindings
 from schemas.history_schemas import MedicalExaminationCreate
@@ -48,7 +51,65 @@ class MedicalHistoryService(BaseService[MedicalHistory]):
         data = obj_in.model_dump(exclude={"patient_id"})
         db_obj = MedicalHistory(**data, mh_id=new_id, patient_uuid=patient.uuid)
 
-        return super().create(db, obj_in=db_obj)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        # Baseline Snapshot creation
+        statement_snap = select(func.count()).select_from(MedicalHistorySnapshot)
+        snap_count = db.exec(statement_snap).one()
+        snap_id = f"MHS-{snap_count + 1:06d}"
+        snapshot = MedicalHistorySnapshot(
+            snapshot_id=snap_id,
+            original_mh_uuid=db_obj.uuid,
+            smoking_status=db_obj.smoking_status,
+            smoking_started_since=db_obj.smoking_started_since,
+            drug_status=db_obj.drug_status,
+            drug_name=db_obj.drug_name,
+            did_rehab=db_obj.did_rehab,
+            alcohol_status=db_obj.alcohol_status,
+            alcohol_est_consumption=db_obj.alcohol_est_consumption,
+            no_of_pregnancies=db_obj.no_of_pregnancies,
+            no_of_miscarriages=db_obj.no_of_miscarriages,
+            no_of_term_deliveries=db_obj.no_of_term_deliveries,
+            no_of_premature_deliveries=db_obj.no_of_premature_deliveries,
+            total_children=db_obj.total_children,
+            surgery_notes=db_obj.surgery_notes,
+            maintenance_medications=db_obj.maintenance_medications
+        )
+        db.add(snapshot)
+        db.commit()
+        return db_obj
+
+    def update(self, db: Session, *, db_obj: MedicalHistory, obj_in: MedicalHistoryUpdate) -> MedicalHistory:
+        updated_history = super().update(db, db_obj=db_obj, obj_in=obj_in)
+
+        statement_snap = select(func.count()).select_from(MedicalHistorySnapshot)
+        snap_count = db.exec(statement_snap).one()
+        snap_id = f"MHS-{snap_count + 1:06d}"
+
+        snapshot = MedicalHistorySnapshot(
+            snapshot_id=snap_id,
+            original_mh_uuid=updated_history.uuid,
+            smoking_status=updated_history.smoking_status,
+            smoking_started_since=updated_history.smoking_started_since,
+            drug_status=updated_history.drug_status,
+            drug_name=updated_history.drug_name,
+            did_rehab=updated_history.did_rehab,
+            alcohol_status=updated_history.alcohol_status,
+            alcohol_est_consumption=updated_history.alcohol_est_consumption,
+            no_of_pregnancies=updated_history.no_of_pregnancies,
+            no_of_miscarriages=updated_history.no_of_miscarriages,
+            no_of_term_deliveries=updated_history.no_of_term_deliveries,
+            no_of_premature_deliveries=updated_history.no_of_premature_deliveries,
+            total_children=updated_history.total_children,
+            surgery_notes=updated_history.surgery_notes,
+            maintenance_medications=updated_history.maintenance_medications
+        )
+
+        db.add(snapshot)
+        db.commit()
+
+        return updated_history
 
 
 class MedicalExaminationService(BaseService[MedicalExamination]):
@@ -114,6 +175,40 @@ class MedicalExaminationService(BaseService[MedicalExamination]):
         db.refresh(db_obj)
 
         return db_obj
+
+    def update(self, db: Session, *, db_obj: MedicalExamination, obj_in: MedicalExaminationUpdate) -> MedicalExamination:
+        updated_exam = super().update(db, db_obj=db_obj, obj_in=obj_in)
+
+        if obj_in.findings is not None:
+            old_findings = db.exec(select(MedicalExaminationFindings).where(MedicalExaminationFindings.me_uuid == db_obj.uuid)).all()
+            for old_finding in old_findings:
+                db.delete(old_finding)
+
+            for finding_data in obj_in.findings:
+                finding = MedicalExaminationFindings(
+                    me_uuid=db_obj.uuid,
+                    bsl_uuid=finding_data.bsl_uuid,
+                    status=finding_data.status,
+                    condition_notes=finding_data.condition_notes
+                )
+                db.add(finding)
+                
+            db.commit()
+
+        statement_snap = select(func.count()).select_from(MedicalExaminationSnapshot)
+        snap_count = db.exec(statement_snap).one()
+        snap_id = f"MES-{snap_count + 1:06d}"
+
+        snapshot = MedicalExaminationSnapshot(
+            snapshot_id = snap_id,
+            original_me_uuid=updated_exam.uuid,
+            date_taken=updated_exam.date_taken
+        )
+
+        db.add(snapshot)
+        db.commit()
+
+        return updated_exam
 
 history_service = MedicalHistoryService()
 medical_examination_service = MedicalExaminationService()
