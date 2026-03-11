@@ -1,20 +1,26 @@
-from schemas.dental_schemas import DentalExaminationUpdate
-from models.dental import DentalExaminationSnapshot
-from schemas.dental_schemas import DentalRecordUpdate
-from models.dental import DentalRecordSnapshot
-from schemas.dental_schemas import DentalRecordCreate
-from typing import List
-from models.history import MedicalHistory
-from schemas.dental_schemas import DentalTreatmentCreate
-from models.dental import DentalServiceRendered
-from models.dental import ToothFinding
-from schemas.dental_schemas import DentalExaminationCreate
-from models.dental import DentalExamination
-from services.patient_service import patient_service
-from typing import Optional
+from typing import List, Optional
+
 from sqlmodel import Session, func, select
+
+from models.dental import (
+    DentalExamination,
+    DentalExaminationSnapshot,
+    DentalRecord,
+    DentalRecordSnapshot,
+    DentalServiceRendered,
+    ToothFinding,
+)
+from models.history import MedicalHistory
+from schemas.dental_schemas import (
+    DentalExaminationCreate,
+    DentalExaminationUpdate,
+    DentalRecordCreate,
+    DentalRecordUpdate,
+    DentalTreatmentCreate,
+)
 from services.base import BaseService
-from models.dental import DentalRecord
+from services.patient_service import patient_service
+
 
 class DentalRecordService(BaseService[DentalRecord]):
     def __init__(self):

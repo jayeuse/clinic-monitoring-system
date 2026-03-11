@@ -1,12 +1,11 @@
-from schemas.base_schemas import GenericResponse
-from schemas.patient_schemas import PatientUpdate, PatientCreate, PatientPublic
-from fastapi import HTTPException
-from core.database import get_session
-from fastapi import Depends
-from sqlmodel import Session
-from fastapi import APIRouter
-
 from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session
+
+from core.database import get_session
+from schemas.base_schemas import GenericResponse
+from schemas.patient_schemas import PatientCreate, PatientPublic, PatientUpdate
 from services.patient_service import patient_service
 
 router = APIRouter(prefix="/patients", tags=["Patients"])

@@ -1,8 +1,11 @@
 from datetime import datetime
-from typing import Optional
-from sqlmodel import Field
-from models.base import BaseModel
 from enum import Enum
+from typing import Optional
+
+from sqlmodel import Field
+
+from models.base import BaseModel
+
 
 class UserType(str, Enum):
     ADMIN = "ADMIN"

@@ -1,13 +1,10 @@
-from datetime import timezone
-from datetime import datetime
-from typing import Union
-from sqlmodel import select
-from typing import List
-from typing import Optional
+from datetime import datetime, timezone
+from typing import Generic, List, Optional, Type, TypeVar, Union
 from uuid import UUID
-from sqlmodel import Session
+
+from sqlmodel import Session, select
+
 from models import BaseModel
-from typing import TypeVar, Generic, Type
 
 T = TypeVar("T", bound=BaseModel)
 

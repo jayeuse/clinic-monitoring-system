@@ -1,12 +1,12 @@
-from datetime import timezone
-from datetime import datetime
-from sqlmodel import Relationship
-from datetime import date
-from typing import Optional, TYPE_CHECKING
-from uuid import UUID
-from sqlmodel import Field, TEXT
-from models.base import BaseModel
+from datetime import date, datetime, timezone
 from enum import Enum
+from typing import TYPE_CHECKING, Optional
+from uuid import UUID
+
+from sqlmodel import TEXT, Field, Relationship
+
+from models.base import BaseModel
+
 
 class SmokeStatus(str, Enum):
     NEVER = "NEVER"

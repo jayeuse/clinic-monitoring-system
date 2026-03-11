@@ -1,11 +1,11 @@
-from uuid import UUID
-from models.dental import SeverityType
-from models.dental import PeriodontalDiagnosis
-from typing import Optional, List
-from pydantic import Field
 from datetime import date
-from models.dental import ToothStatus
-from pydantic import BaseModel, field_validator
+from typing import List, Optional
+from uuid import UUID
+
+from pydantic import BaseModel, Field, field_validator
+
+from models.dental import PeriodontalDiagnosis, SeverityType, ToothStatus
+
 
 class ToothFindingBase(BaseModel):
     tooth_number: str

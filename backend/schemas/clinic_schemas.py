@@ -1,8 +1,8 @@
-from pydantic import Field
-from datetime import time
-from datetime import date
-from typing import Optional, Any
-from pydantic import BaseModel, computed_field
+from datetime import date, time
+from typing import Any, Optional
+
+from pydantic import BaseModel, Field, computed_field
+
 
 class VitalSignsCreate(BaseModel):
     ct_id: str

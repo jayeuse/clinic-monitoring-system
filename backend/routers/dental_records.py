@@ -1,11 +1,16 @@
-from schemas.dental_schemas import DentalRecordCreate
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
+
 from core.database import get_session
 from schemas.base_schemas import GenericResponse
-from schemas.dental_schemas import DentalRecordPublic, DentalRecordUpdate
+from schemas.dental_schemas import (
+    DentalRecordCreate,
+    DentalRecordPublic,
+    DentalRecordUpdate,
+)
 from services.dental_service import dental_record_service
-from typing import List
 
 router = APIRouter(prefix="/dental_records", tags=["Dental Records"])
 

@@ -1,11 +1,14 @@
-from typing import Optional
-from schemas.clinic_schemas import VitalSignsCreate
 from datetime import datetime
-from .patient_service import patient_service
-from schemas.clinic_schemas import ClinicTransactionCreate
-from sqlmodel import Session, select, func
+from typing import Optional
+
+from sqlmodel import Session, func, select
+
 from models.clinic import ClinicTransaction, VitalSigns
+from schemas.clinic_schemas import ClinicTransactionCreate, VitalSignsCreate
 from services.base import BaseService
+
+from .patient_service import patient_service
+
 
 class ClinicTransactionService(BaseService[ClinicTransaction]):
     def __init__(self):

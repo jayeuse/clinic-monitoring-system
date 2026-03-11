@@ -1,10 +1,12 @@
-from datetime import date
+from datetime import date, datetime, timezone
+from enum import Enum
 from typing import Optional
 from uuid import UUID
-from sqlmodel import Field, TEXT
+
+from sqlmodel import TEXT, Field
+
 from models.base import BaseModel
-from enum import Enum
-from datetime import datetime, timezone
+
 
 class PeriodontalDiagnosis(str, Enum):
     HEALTHY = "HEALTHY"

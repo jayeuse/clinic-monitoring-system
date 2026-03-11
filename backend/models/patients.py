@@ -1,10 +1,11 @@
-from sqlmodel import Relationship
-from uuid import UUID
-from typing import Optional, TYPE_CHECKING
 from datetime import date
-from sqlmodel import Field
-from models.base import BaseModel
 from enum import Enum
+from typing import TYPE_CHECKING, Optional
+from uuid import UUID
+
+from sqlmodel import Field, Relationship
+
+from models.base import BaseModel
 
 if TYPE_CHECKING:
     from .clinic import ClinicTransaction

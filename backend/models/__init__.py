@@ -1,8 +1,28 @@
 # This file makes it easy to import all models at once
 from models.base import BaseModel
-from models.users import User
-from models.patients import PatientInformation, StudentType, PersonnelType
-from models.lookups import DepartmentsLookup, MedicalConditionsLookup, SmokingTypesLookup, BodySystemsLookup
 from models.clinic import ClinicTransaction, VitalSigns
-from models.history import MedicalHistory, PatientSmokingTypes, PatientDiagnosedConditions, MedicalExamination, MedicalExaminationFindings, MedicalHistorySnapshot, MedicalExaminationSnapshot
-from models.dental import DentalRecord, DentalExamination, ToothFinding, DentalServiceRendered, DentalExaminationSnapshot, DentalRecordSnapshot
+from models.dental import (
+    DentalExamination,
+    DentalExaminationSnapshot,
+    DentalRecord,
+    DentalRecordSnapshot,
+    DentalServiceRendered,
+    ToothFinding,
+)
+from models.history import (
+    MedicalExamination,
+    MedicalExaminationFindings,
+    MedicalExaminationSnapshot,
+    MedicalHistory,
+    MedicalHistorySnapshot,
+    PatientDiagnosedConditions,
+    PatientSmokingTypes,
+)
+from models.lookups import (
+    BodySystemsLookup,
+    DepartmentsLookup,
+    MedicalConditionsLookup,
+    SmokingTypesLookup,
+)
+from models.patients import PatientInformation, PersonnelType, StudentType
+from models.users import User

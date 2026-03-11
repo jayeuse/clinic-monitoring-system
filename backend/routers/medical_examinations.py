@@ -1,12 +1,16 @@
 from typing import List
-from schemas.history_schemas import MedicalExaminationUpdate
-from schemas.history_schemas import MedicalExaminationCreate
-from services.history_service import medical_examination_service
-from core.database import get_session
-from sqlmodel import Session
-from schemas.history_schemas import MedicalExaminationPublic
-from schemas.base_schemas import GenericResponse
+
 from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session
+
+from core.database import get_session
+from schemas.base_schemas import GenericResponse
+from schemas.history_schemas import (
+    MedicalExaminationCreate,
+    MedicalExaminationPublic,
+    MedicalExaminationUpdate,
+)
+from services.history_service import medical_examination_service
 
 router = APIRouter(prefix="/medical_examinations", tags=["Medical Examination"])
 

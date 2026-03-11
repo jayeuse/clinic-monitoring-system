@@ -1,6 +1,9 @@
 from enum import Enum
+
 from sqlmodel import Field
+
 from models.base import BaseModel
+
 
 class DepartmentType(str, Enum):
     ACADEMIC = "ACADEMIC"

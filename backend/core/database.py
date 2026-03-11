@@ -1,7 +1,7 @@
-from sqlmodel import Session
-from sqlmodel import SQLModel, create_engine
+from sqlmodel import Session, SQLModel, create_engine
+
+import models  # noqa: F401
 from core.config import settings
-import models # noqa: F401
 
 engine = create_engine(
     settings.DATABASE_URL, 

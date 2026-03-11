@@ -1,10 +1,19 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from core.config import settings
 from core.database import create_database
+from routers import (
+    clinic,
+    dental_examinations,
+    dental_records,
+    medical_examinations,
+    medical_history,
+    patients,
+)
 
-from routers import patients, clinic, medical_history, medical_examinations, dental_records, dental_examinations
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -1,17 +1,22 @@
-from schemas.history_schemas import MedicalExaminationUpdate
-from models.history import MedicalHistorySnapshot
-from schemas.history_schemas import MedicalHistoryUpdate
-from models.history import MedicalExaminationSnapshot
-from models.history import MedicalExaminationFindings
-from schemas.history_schemas import MedicalExaminationCreate
-from models.history import MedicalExamination
-from typing import Optional, List
-from sqlmodel import select, func
-from services.patient_service import patient_service
-from schemas.history_schemas import MedicalHistoryCreate
-from sqlmodel import Session
-from models.history import MedicalHistory
+from typing import List, Optional
+
+from sqlmodel import Session, func, select
+
+from models.history import (
+    MedicalExamination,
+    MedicalExaminationFindings,
+    MedicalExaminationSnapshot,
+    MedicalHistory,
+    MedicalHistorySnapshot,
+)
+from schemas.history_schemas import (
+    MedicalExaminationCreate,
+    MedicalExaminationUpdate,
+    MedicalHistoryCreate,
+    MedicalHistoryUpdate,
+)
 from services.base import BaseService
+from services.patient_service import patient_service
 
 
 class MedicalHistoryService(BaseService[MedicalHistory]):

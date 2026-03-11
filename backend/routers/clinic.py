@@ -1,25 +1,23 @@
-from schemas.base_schemas import GenericResponse
-from services.clinic_service import vital_signs_service
-from fastapi import HTTPException
-from core.database import get_session
-from fastapi import Depends
 from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
-from fastapi import APIRouter
 
-from services.clinic_service import clinic_service
-
+from core.database import get_session
+from schemas.base_schemas import GenericResponse
 from schemas.clinic_schemas import (
-    ClinicTransactionCreate, 
-    ClinicTransactionPublic, 
+    ClinicTransactionCreate,
+    ClinicTransactionPublic,
     ClinicTransactionUpdate,
-    VitalSignsCreate, 
+    VitalSignsCreate,
     VitalSignsPublic,
-    VitalSignsUpdate
+    VitalSignsUpdate,
 )
+from services.clinic_service import clinic_service, vital_signs_service
 
 router = APIRouter(prefix="/clinic", tags=["Clinic Operations"])
 
+# CLINIC TRANSACTIONS
 @router.get("/transactions/", response_model=GenericResponse[List[ClinicTransactionPublic]])
 def read_transactions(
     db: Session = Depends(get_session), skip: int = 0, limit: int = 100
@@ -63,6 +61,14 @@ def delete_transaction(ct_id: str, db: Session = Depends(get_session)):
     delete_transaction = clinic_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Transaction deleted successfully", data=delete_transaction)
 
+# VITAL SIGNS
+@router.get("/vital-signs/", response_model=GenericResponse[List[VitalSignsPublic]])
+def read_vital_signs(
+    db: Session = Depends(get_session), skip: int = 0, limit: int = 100
+):
+    get_all_vital_signs = vital_signs_service.get_all(db, skip=skip, limit=limit)
+    return GenericResponse(message="Vital Signs retrieved successfully", data=get_all_vital_signs)
+
 @router.post("/vital-signs/", response_model=GenericResponse[VitalSignsPublic])
 def record_vital_sign(vs_in: VitalSignsCreate, db: Session = Depends(get_session)):
     try:
@@ -97,10 +103,3 @@ def delete_vital_sign(vs_id: str, db: Session = Depends(get_session)):
     delete_vital_sign = vital_signs_service.remove(db, uuid=db_obj.uuid)
     return GenericResponse(message="Vital Sign deleted successfully", data=delete_vital_sign)
 
-
-@router.get("/vital-signs/", response_model=GenericResponse[List[VitalSignsPublic]])
-def read_vital_signs(
-    db: Session = Depends(get_session), skip: int = 0, limit: int = 100
-):
-    get_all_vital_signs = vital_signs_service.get_all(db, skip=skip, limit=limit)
-    return GenericResponse(message="Vital Signs retrieved successfully", data=get_all_vital_signs)

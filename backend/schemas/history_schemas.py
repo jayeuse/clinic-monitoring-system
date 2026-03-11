@@ -1,14 +1,11 @@
-from models.history import BodySystemStatus
-from uuid import UUID
-from pydantic import Field, computed_field
-from typing import Any
-from pydantic import ConfigDict
-from models.history import AlcoholStatus
-from models.history import DrugStatus
 from datetime import date
-from typing import Optional
-from models.history import SmokeStatus
-from pydantic import BaseModel
+from typing import Any, Optional
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field, computed_field
+
+from models.history import AlcoholStatus, BodySystemStatus, DrugStatus, SmokeStatus
+
 
 class MedicalHistoryCreate(BaseModel):
     patient_id: str

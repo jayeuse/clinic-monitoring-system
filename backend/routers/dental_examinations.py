@@ -1,16 +1,18 @@
-from schemas.dental_schemas import ToothFindingPublic
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
+
 from core.database import get_session
 from schemas.base_schemas import GenericResponse
 from schemas.dental_schemas import (
     DentalExaminationCreate,
-    DentalExaminationUpdate,
     DentalExaminationPublic,
+    DentalExaminationUpdate,
     DentalTreatmentCreate,
-    DentalTreatmentUpdate,
     DentalTreatmentPublic,
+    DentalTreatmentUpdate,
+    ToothFindingPublic,
 )
 from services.dental_service import examination_service, treatment_service
 

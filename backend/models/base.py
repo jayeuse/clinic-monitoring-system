@@ -1,7 +1,9 @@
-from typing import Optional
 from datetime import datetime, timezone
-from sqlmodel import SQLModel, Field
+from typing import Optional
 from uuid import UUID, uuid4
+
+from sqlmodel import Field, SQLModel
+
 
 class UUIDModel(SQLModel):
     uuid: UUID = Field(

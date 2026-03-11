@@ -1,8 +1,10 @@
-from models.patients import SexType
 from datetime import date
 from typing import Optional
-from models.patients import PatientType
+
 from pydantic import BaseModel, computed_field
+
+from models.patients import PatientType, SexType
+
 
 class PatientCreate(BaseModel):
     patient_type: PatientType
