@@ -125,3 +125,48 @@ class EmergencyContactPublic(BaseModel):
     city: Optional[str] = None
     province: Optional[str] = None
     zip_code: Optional[str] = None
+
+class StudentTypeCreate(BaseModel):
+    student_id: str
+    patient_id: str
+    dl_id: str
+
+    course: str
+    batch: str
+    school_year: str
+
+class StudentTypeUpdate(BaseModel):
+    dl_id: Optional[str] = None
+
+    course: Optional[str] = None
+    batch: Optional[str] = None
+    school_year: Optional[str] = None
+
+class StudentTypePublic(BaseModel):
+    student_id: str
+    patient_uuid: str
+    dl_uuid: Optional[str] = None
+
+    course: str
+    batch: str
+    school_year: str
+
+class PersonnelTypeCreate(BaseModel):
+    personnel_id: str
+    patient_id: str
+
+    dl_id: str
+    teaching: bool
+
+class PersonnelTypeUpdate(BaseModel):
+    dl_id: Optional[str] = None
+
+    teaching: Optional[bool] = None
+
+class PersonnelTypePublic(BaseModel):
+    personnel_id: str
+    patient_uuid: str
+    
+    dl_uuid: Optional[str] = None
+    teaching: bool
+
