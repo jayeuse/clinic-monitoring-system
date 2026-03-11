@@ -1,10 +1,11 @@
+import math
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
 from core.database import get_session
-from schemas.base_schemas import GenericResponse
+from schemas.base_schemas import GenericResponse, PaginationMeta
 from schemas.dental_schemas import (
     DentalExaminationCreate,
     DentalExaminationPublic,
@@ -19,9 +20,21 @@ from services.dental_service import examination_service, treatment_service
 router = APIRouter(prefix="/dental_examinations", tags=["Dental Examinations"])
 
 @router.get("/", response_model=GenericResponse[List[DentalExaminationPublic]])
-def read_dental_examinations(db: Session = Depends(get_session)):
-    examinations = examination_service.get_all(db)
-    return GenericResponse(message="All Dental Examinations retrieved successfully", data=examinations)
+def read_dental_examinations(skip: int = 0, limit: int = 100,db: Session = Depends(get_session)):
+    examinations, total_count = examination_service.get_all(db, skip=skip, limit=limit)
+
+    current_page = (skip // limit) + 1
+    total_pages = math.ceil(total_count / limit) if limit > 0 else 1
+
+    meta = PaginationMeta(
+        total_records=total_count,
+        current_page=current_page,
+        total_pages=total_pages,
+        next_page=(current_page + 1) if (skip + limit) < total_count else None,
+        prev_page=(current_page - 1) if skip > 0 else None
+    )
+
+    return GenericResponse(message="All Dental Examinations retrieved successfully", data=examinations, meta=meta)
 
 @router.post("/", response_model=GenericResponse[DentalExaminationPublic])
 def record_dental_examination(exam_in: DentalExaminationCreate, db: Session = Depends(get_session)):
@@ -64,9 +77,20 @@ def read_examination_findings(dru_id: str, db: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.get("/treatments/", response_model=GenericResponse[List[DentalTreatmentPublic]])
-def read_dental_treatments(db: Session = Depends(get_session)):
-    treatments = treatment_service.get_all(db)
-    return GenericResponse(message="All Dental Treatments retrieved successfully", data=treatments)
+def read_dental_treatments(skip: int = 0, limit: int = 100, db: Session = Depends(get_session)):
+    treatments, total_count = treatment_service.get_all(db, skip=skip, limit=limit)
+
+    current_page = (skip // limit) + 1
+    total_pages = math.ceil(total_count / limit) if limit > 0 else 1
+
+    meta = PaginationMeta(
+        total_records=total_count,
+        current_page=current_page,
+        total_pages=total_pages,
+        next_page=(current_page + 1) if (skip + limit) < total_count else None,
+        prev_page=(current_page - 1) if skip > 0 else None
+    )
+    return GenericResponse(message="All Dental Treatments retrieved successfully", data=treatments, meta=meta)
 
 @router.post("/treatments/", response_model=GenericResponse[DentalTreatmentPublic])
 def record_dental_treatment(treatment_in: DentalTreatmentCreate, db: Session = Depends(get_session)):

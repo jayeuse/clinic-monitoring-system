@@ -1,10 +1,11 @@
+import math
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
 from core.database import get_session
-from schemas.base_schemas import GenericResponse
+from schemas.base_schemas import GenericResponse, PaginationMeta
 from schemas.clinic_schemas import (
     ClinicTransactionCreate,
     ClinicTransactionPublic,
@@ -22,8 +23,19 @@ router = APIRouter(prefix="/clinic", tags=["Clinic Operations"])
 def read_transactions(
     db: Session = Depends(get_session), skip: int = 0, limit: int = 100
 ):
-    get_transactions = clinic_service.get_all(db, skip=skip, limit=limit)
-    return GenericResponse(message="Transactions retrieved successfully", data=get_transactions)
+    get_transactions, total_count = clinic_service.get_all(db, skip=skip, limit=limit)
+
+    current_page = (skip // limit) + 1
+    total_pages = math.ceil(total_count / limit) if limit > 0 else 1
+
+    meta = PaginationMeta(
+        total_records=total_count,
+        current_page=current_page,
+        total_pages=total_pages,
+        next_page=(current_page + 1) if (skip + limit) < total_count else None,
+        prev_page=(current_page - 1) if skip > 0 else None
+    )
+    return GenericResponse(message="Transactions retrieved successfully", data=get_transactions, meta=meta)
 
 @router.post("/transactions/", response_model=GenericResponse[ClinicTransactionPublic])
 def create_transaction(
@@ -66,8 +78,20 @@ def delete_transaction(ct_id: str, db: Session = Depends(get_session)):
 def read_vital_signs(
     db: Session = Depends(get_session), skip: int = 0, limit: int = 100
 ):
-    get_all_vital_signs = vital_signs_service.get_all(db, skip=skip, limit=limit)
-    return GenericResponse(message="Vital Signs retrieved successfully", data=get_all_vital_signs)
+    get_all_vital_signs, total_count = vital_signs_service.get_all(db, skip=skip, limit=limit)
+
+    current_page = (skip // limit) + 1
+    total_pages = math.ceil(total_count / limit) if limit > 0 else 1
+
+    meta = PaginationMeta(
+        total_records=total_count,
+        current_page=current_page,
+        total_pages=total_pages,
+        next_page=(current_page + 1) if (skip + limit) < total_count else None,
+        prev_page=(current_page - 1) if skip > 0 else None
+    )
+
+    return GenericResponse(message="Vital Signs retrieved successfully", data=get_all_vital_signs, meta=meta)
 
 @router.post("/vital-signs/", response_model=GenericResponse[VitalSignsPublic])
 def record_vital_sign(vs_in: VitalSignsCreate, db: Session = Depends(get_session)):

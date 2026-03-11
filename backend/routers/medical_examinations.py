@@ -1,10 +1,11 @@
+import math
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
 from core.database import get_session
-from schemas.base_schemas import GenericResponse
+from schemas.base_schemas import GenericResponse, PaginationMeta
 from schemas.history_schemas import (
     MedicalExaminationCreate,
     MedicalExaminationPublic,
@@ -16,8 +17,23 @@ router = APIRouter(prefix="/medical_examinations", tags=["Medical Examination"])
 
 @router.get("/", response_model=GenericResponse[List[MedicalExaminationPublic]])
 def read_all_medical_examinations(db: Session = Depends(get_session), skip: int = 0, limit: int = 0):
-    get_all_examinations = medical_examination_service.get_all(db, skip=skip, limit=limit)
-    return GenericResponse(message="All Medical Examinations Retrieved Successfully", data=get_all_examinations)
+    get_all_examinations, total_count = medical_examination_service.get_all(db, skip=skip, limit=limit)
+
+    current_page = (skip // limit) + 1
+    total_pages = math.ceil(total_count / limit) if limit > 0 else 1
+
+    meta = PaginationMeta(
+        total_records=total_count,
+        current_page=current_page,
+        total_pages=total_pages,
+        next_page=(current_page + 1) if (skip + limit) < total_count else None,
+        prev_page=(current_page - 1) if skip > 0 else None
+    )
+
+    return GenericResponse(
+        message="All Medical Examinations Retrieved Successfully", 
+        data=get_all_examinations,
+        meta=meta)
 
 @router.post("/", response_model=GenericResponse[MedicalExaminationPublic])
 def create_medical_examination(examination_in: MedicalExaminationCreate, db: Session = Depends(get_session)):

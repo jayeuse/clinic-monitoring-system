@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
-from typing import Generic, List, Optional, Type, TypeVar, Union
+from typing import Generic, List, Optional, Tuple, Type, TypeVar, Union
 from uuid import UUID
 
-from sqlmodel import Session, select
+from sqlmodel import Session, func, select
 
 from models import BaseModel
 
@@ -20,9 +20,13 @@ class BaseService(Generic[T]):
 
         return obj
 
-    def get_all(self, db: Session, *, skip: int = 0, limit: int = 100) -> List[T]:
+    def get_all(self, db: Session, *, skip: int = 0, limit: int = 100) -> Tuple[List[T], int]:
         statement = select(self.model).where(self.model.is_deleted.is_(False)).offset(skip).limit(limit)
-        return db.exec(statement).all()
+        
+        count_statement = select(func.count()).select_from(self.model).where(self.model.is_deleted.is_(False))
+        
+        return db.exec(statement).all(), db.exec(count_statement).one()
+
 
     def create(self, db: Session, *, obj_in: T) -> T:
         db.add(obj_in)
