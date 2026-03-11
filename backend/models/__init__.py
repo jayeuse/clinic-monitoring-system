@@ -15,9 +15,9 @@ from models.history import (
     MedicalExaminationSnapshot,
     MedicalHistory,
     MedicalHistorySnapshot,
+    MedicalTreatment,
     PatientDiagnosedConditions,
     PatientSmokingTypes,
-    MedicalTreatment
 )
 from models.lookups import (
     BodySystemsLookup,

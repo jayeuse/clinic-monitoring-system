@@ -1,16 +1,17 @@
-from schemas.history_schemas import MedicalTreatmentUpdate
-from fastapi import HTTPException
-from schemas.history_schemas import MedicalTreatmentCreate
 import math
-from services.history_service import medical_treatment_service
-from core.database import get_session
-from fastapi import Depends
-from sqlmodel import Session
-from schemas.history_schemas import MedicalTreatmentPublic
 from typing import List
-from schemas.base_schemas import GenericResponse, PaginationMeta
-from fastapi import APIRouter
 
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session
+
+from core.database import get_session
+from schemas.base_schemas import GenericResponse, PaginationMeta
+from schemas.history_schemas import (
+    MedicalTreatmentCreate,
+    MedicalTreatmentPublic,
+    MedicalTreatmentUpdate,
+)
+from services.history_service import medical_treatment_service
 
 router = APIRouter(prefix="/medical-treatments", tags=["Medical Treatments"])
 
