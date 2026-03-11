@@ -11,6 +11,7 @@ from routers import (
     dental_records,
     medical_examinations,
     medical_history,
+    medical_treatments,
     patients,
 )
 
@@ -41,6 +42,7 @@ app.include_router(patients.router)
 app.include_router(clinic.router)
 app.include_router(medical_history.router)
 app.include_router(medical_examinations.router)
+app.include_router(medical_treatments.router)
 app.include_router(dental_records.router)
 app.include_router(dental_examinations.router)
 

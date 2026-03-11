@@ -118,3 +118,12 @@ class MedicalExaminationSnapshot(BaseModel, table=True):
     original_me_uuid: UUID = Field(foreign_key="medicalexamination.uuid", index=True)
     snapshot_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     date_taken: date = Field(default_factory=date.today)
+
+class MedicalTreatment(BaseModel, table=True):
+    mt_id: str = Field(unique=True, index=True, max_length=20)
+
+    mh_uuid: UUID = Field(foreign_key="medicalhistory.uuid")
+
+    date_taken: date = Field(default_factory=date.today)
+    physician_notes: Optional[str] = Field(default=None, sa_type=TEXT)
+    nurse_notes: Optional[str] = Field(default=None, sa_type=TEXT)

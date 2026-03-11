@@ -111,3 +111,23 @@ class MedicalExaminationPublic(BaseModel):
     date_taken: date
 
     findings: Optional[list[MedicalExaminationFindingsPublic]] = None
+
+class MedicalTreatmentCreate(BaseModel):
+    mh_id: str
+    date_taken: Optional[date] = None
+    physician_notes: Optional[str] = None
+    nurse_notes: Optional[str] = None
+
+class MedicalTreatmentUpdate(BaseModel):
+    mh_id: str
+    date_taken: Optional[date] = None
+    physician_notes: Optional[str] = None
+    nurse_notes: Optional[str] = None
+
+class MedicalTreatmentPublic(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    mt_id: str
+    mh_uuid: UUID
+    date_taken: Optional[date] = None
+    physician_notes: Optional[str] = None
+    nurse_notes: Optional[str] = None

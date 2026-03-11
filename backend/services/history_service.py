@@ -8,12 +8,15 @@ from models.history import (
     MedicalExaminationSnapshot,
     MedicalHistory,
     MedicalHistorySnapshot,
+    MedicalTreatment,
 )
 from schemas.history_schemas import (
     MedicalExaminationCreate,
     MedicalExaminationUpdate,
     MedicalHistoryCreate,
     MedicalHistoryUpdate,
+    MedicalTreatmentCreate,
+    MedicalTreatmentUpdate,
 )
 from services.base import BaseService
 from services.patient_service import patient_service
@@ -215,5 +218,41 @@ class MedicalExaminationService(BaseService[MedicalExamination]):
 
         return updated_exam
 
+class MedicalTreatmentService(BaseService[MedicalTreatment]):
+    def __init__(self):
+        super().__init__(MedicalTreatment)
+
+    def get_by_mt_id(self, db: Session, mt_id: str) -> Optional[MedicalTreatment]:
+        statement = select(self.model).where(self.model.mt_id == mt_id, self.model.is_deleted.is_(False))
+        return db.exec(statement).first()
+
+    def get_by_patient_id(self, db: Session, patient_id: str) -> List[MedicalTreatment]:
+        patient = patient_service.get_by_patient_id(db, patient_id=patient_id)
+        if not patient:
+            return []
+
+        statement = select(self.model).join(MedicalHistory).where(MedicalHistory.patient_uuid == patient.uuid, self.model.is_deleted.is_(False))
+        return db.exec(statement).all()
+
+    def create(self, db: Session, *, obj_in: MedicalTreatmentCreate) -> MedicalTreatment:
+        history = history_service.get_by_mh_id(db, mh_id=obj_in.mh_id)
+        if not history:
+            raise ValueError(f"Medical History with ID {obj_in.mh_id} not found.")
+
+        statement = select(func.count()).select_from(self.model)
+        count = db.exec(statement).one()
+        new_id = f"MT-{count + 1:06d}"
+
+        data = obj_in.model_dump(exclude={"mh_id"})
+        db_obj = MedicalTreatment(**data, mt_id=new_id, mh_uuid=history.uuid)
+
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+
+        return db_obj
+
+
 history_service = MedicalHistoryService()
 medical_examination_service = MedicalExaminationService()
+medical_treatment_service = MedicalTreatmentService()
